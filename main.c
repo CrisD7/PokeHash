@@ -1,12 +1,18 @@
 
 #include "pokehash.h"
+#include "tdas/extra.h"
+
 
 int main() {
     int opcion = 0;
     Equipo miEquipo;
     
+    cargar_data();
+
     // Inicializamos el equipo vacío al arrancar el programa
     inicializarEquipo(&miEquipo);
+    
+
 
     while (opcion != 4) {
         mostrarMenu();
