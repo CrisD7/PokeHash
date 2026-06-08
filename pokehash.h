@@ -5,10 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "tdas/map.h"
 
 typedef struct {
     int id;
-    char nombre[50];
+    char nombre[100];
     char tipo1[20];
     char tipo2[20];
     int total_stats;
@@ -26,7 +27,12 @@ typedef struct {
     int tope;
 } Equipo;
 
+extern Map *pokedex;
+
 void mostrarMenu();
 void inicializarEquipo(Equipo* e);
+void cargar_data();
+void explorar_pokedex();
+void liberar_pokedex();
 
 #endif

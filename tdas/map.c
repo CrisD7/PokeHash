@@ -2,123 +2,177 @@
 #include "list.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 
-typedef struct Node {
-  void *data;
-  struct Node *next;
-} Node;
-
-struct List {
-  Node *head;
-  Node *tail;
-  Node *current;
-  int size;
-};
+#define BUCKETS_LIMIT 200
 
 struct Map {
-  int (*lower_than)(void *key1, void *key2);
-  int (*is_equal)(void *key1, void *key2);
-  List *ls;
+    List *buckets[BUCKETS_LIMIT];
+    int size;
+    int (*is_equal)(void *key1, void *key2);
+    int current_bucket;
 };
 
-typedef Map Map;
-typedef List List;
-
-// Variable global para almacenar la función de comparación actual
-int (*current_lt)(void *, void *) = NULL;
-
-int pair_lt(void *pair1, void *pair2) {
-  return (current_lt(((MapPair *)pair1)->key, ((MapPair *)pair2)->key));
-}
-
-void list_sortedInsert(List *L, void *data,
-                       int (*lower_than)(void *data1, void *data2)) {
-  if (L == NULL) {
-    return; // Lista no inicializada
-  }
-
-  // Caso especial: inserción al principio o en lista vacía
-  if (L->head == NULL || lower_than(data, L->head->data)) {
-    list_pushFront(L, data);
-    return;
-  }
-
-  // Caso general: encontrar la posición correcta para insertar
-  Node *current = L->head;
-  while (current->next != NULL && !lower_than(data, current->next->data)) {
-    current = current->next;
-  }
-
-  // Preparar para usar list_pushCurrent
-  L->current = current;
-
-  // Insertar el nodo en la posición actual
-  list_pushCurrent(L, data);
-}
-
-Map *sorted_map_create(int (*lower_than)(void *key1, void *key2)) {
-  Map *newMap = (Map *)malloc(sizeof(Map));
-  newMap->lower_than = lower_than;
-  newMap->is_equal = NULL;
-  newMap->ls = list_create();
-
-  return newMap;
+// Función Hash DJB2 sensible a mayúsculas/minúsculas pero normalizada a minúsculas
+// para lograr insensibilidad a mayúsculas en la búsqueda.
+static unsigned long hash_string(void *key) {
+    if (key == NULL) return 0;
+    char *str = (char *)key;
+    unsigned long hash = 5381;
+    int c;
+    while ((c = (unsigned char)*str++)) {
+        hash = ((hash << 5) + hash) + tolower(c);
+    }
+    return hash;
 }
 
 Map *map_create(int (*is_equal)(void *key1, void *key2)) {
-  Map *newMap = (Map *)malloc(sizeof(Map));
-  newMap->lower_than = NULL;
-  newMap->is_equal = is_equal;
-  newMap->ls = list_create();
+    Map *newMap = (Map *)malloc(sizeof(Map));
+    if (newMap == NULL) return NULL;
 
-  return newMap;
+    for (int i = 0; i < BUCKETS_LIMIT; i++) {
+        newMap->buckets[i] = list_create();
+        if (newMap->buckets[i] == NULL) {
+            // Si falla la inicialización de alguna lista, liberamos las creadas
+            for (int j = 0; j < i; j++) {
+                free(newMap->buckets[j]);
+            }
+            free(newMap);
+            return NULL;
+        }
+    }
+    newMap->size = 0;
+    newMap->is_equal = is_equal;
+    newMap->current_bucket = -1;
+    return newMap;
 }
 
-
-void multimap_insert(Map *map, void *key, void *value) {
-  MapPair *pair = (MapPair *)malloc(sizeof(MapPair));
-  pair->key = key;
-  pair->value = value;
-
-  if (map->lower_than) {
-    current_lt = map->lower_than;
-    list_sortedInsert(map->ls, pair, pair_lt);
-  } else
-    list_pushBack(map->ls, pair);
+Map *sorted_map_create(int (*lower_than)(void *key1, void *key2)) {
+    // Las tablas hash son inherentemente desordenadas.
+    // Retornamos NULL ya que para este proyecto utilizaremos map_create.
+    (void)lower_than;
+    return NULL;
 }
 
 void map_insert(Map *map, void *key, void *value) {
-  if (map_search(map, key) != NULL) return;
-  multimap_insert(map, key, value);
-}
+    if (map == NULL || key == NULL) return;
 
-int _is_equal(Map *map, MapPair *pair, void *key) {
-  return ((map->is_equal && map->is_equal(pair->key, key)) ||
-          (map->lower_than && !map->lower_than(pair->key, key) &&
-           !map->lower_than(key, pair->key)));
+    // Evitar duplicados
+    if (map_search(map, key) != NULL) return;
+
+    unsigned long h = hash_string(key);
+    int bucket = h % BUCKETS_LIMIT;
+
+    MapPair *pair = (MapPair *)malloc(sizeof(MapPair));
+    if (pair == NULL) return;
+
+    pair->key = key;
+    pair->value = value;
+
+    list_pushBack(map->buckets[bucket], pair);
+    map->size++;
 }
 
 MapPair *map_remove(Map *map, void *key) {
-  for (MapPair *pair = list_first(map->ls); pair != NULL;
-       pair = list_next(map->ls))
-    if (_is_equal(map, pair, key)) {
-      list_popCurrent(map->ls);
-      return pair;
+    if (map == NULL || key == NULL) return NULL;
+
+    unsigned long h = hash_string(key);
+    int bucket = h % BUCKETS_LIMIT;
+
+    List *l = map->buckets[bucket];
+    MapPair *pair = (MapPair *)list_first(l);
+    while (pair != NULL) {
+        if (map->is_equal(pair->key, key)) {
+            list_popCurrent(l);
+            map->size--;
+            return pair;
+        }
+        pair = (MapPair *)list_next(l);
     }
-  return NULL;
+    return NULL;
 }
 
 MapPair *map_search(Map *map, void *key) {
-  for (MapPair *pair = list_first(map->ls); pair != NULL;
-       pair = list_next(map->ls)) {
-    if (_is_equal(map, pair, key))
-      return pair;
-  }
-  return NULL;
+    if (map == NULL || key == NULL) return NULL;
+
+    unsigned long h = hash_string(key);
+    int bucket = h % BUCKETS_LIMIT;
+
+    List *l = map->buckets[bucket];
+    MapPair *pair = (MapPair *)list_first(l);
+    while (pair != NULL) {
+        if (map->is_equal(pair->key, key)) {
+            return pair;
+        }
+        pair = (MapPair *)list_next(l);
+    }
+    return NULL;
 }
 
-MapPair *map_first(Map *map) { return list_first(map->ls); }
+MapPair *map_first(Map *map) {
+    if (map == NULL) return NULL;
 
-MapPair *map_next(Map *map) { return list_next(map->ls); }
+    for (int i = 0; i < BUCKETS_LIMIT; i++) {
+        List *l = map->buckets[i];
+        MapPair *pair = (MapPair *)list_first(l);
+        if (pair != NULL) {
+            map->current_bucket = i;
+            return pair;
+        }
+    }
+    map->current_bucket = -1;
+    return NULL;
+}
 
-void map_clean(Map *map) { list_clean(map->ls); }
+MapPair *map_next(Map *map) {
+    if (map == NULL || map->current_bucket == -1) return NULL;
+
+    // Primero intentamos avanzar en la lista del bucket actual
+    List *l = map->buckets[map->current_bucket];
+    MapPair *pair = (MapPair *)list_next(l);
+    if (pair != NULL) {
+        return pair;
+    }
+
+    // Si no quedan más elementos en el bucket actual, buscamos en los siguientes
+    for (int i = map->current_bucket + 1; i < BUCKETS_LIMIT; i++) {
+        l = map->buckets[i];
+        pair = (MapPair *)list_first(l);
+        if (pair != NULL) {
+            map->current_bucket = i;
+            return pair;
+        }
+    }
+
+    map->current_bucket = -1;
+    return NULL;
+}
+
+void map_clean(Map *map) {
+    if (map == NULL) return;
+
+    for (int i = 0; i < BUCKETS_LIMIT; i++) {
+        List *l = map->buckets[i];
+        MapPair *pair = (MapPair *)list_first(l);
+        while (pair != NULL) {
+            MapPair *to_free = pair;
+            pair = (MapPair *)list_next(l);
+            free(to_free);
+        }
+        list_clean(l);
+    }
+    map->size = 0;
+    map->current_bucket = -1;
+}
+
+void map_destroy(Map *map) {
+    if (map == NULL) return;
+    map_clean(map);
+    for (int i = 0; i < BUCKETS_LIMIT; i++) {
+        if (map->buckets[i] != NULL) {
+            free(map->buckets[i]);
+        }
+    }
+    free(map);
+}
