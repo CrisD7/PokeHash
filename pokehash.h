@@ -28,11 +28,12 @@ typedef struct {
 } Equipo;
 
 extern Map *pokedex;
+extern Map *pokedex_by_id;
 
 void mostrarMenu();
 void inicializarEquipo(Equipo* e);
 void cargar_data();
-void explorar_pokedex();
+void menu_explorar_pokedex();
 void liberar_pokedex();
 
 #endif

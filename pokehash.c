@@ -4,6 +4,7 @@
 #include <ctype.h>
 
 Map *pokedex = NULL;
+Map *pokedex_by_id = NULL;
 
 void mostrarMenu() {
     printf("\n========================================\n");
@@ -37,11 +38,12 @@ void cargar_data(){
         return;
     }
 
-    // Inicializar el mapa de la Pokédex
+    // Inicializar los mapas de la Pokédex
     pokedex = map_create(string_is_equal);
-    if(pokedex == NULL){
+    pokedex_by_id = map_create(string_is_equal);
+    if(pokedex == NULL || pokedex_by_id == NULL){
         fclose(archivo);
-        printf("Error al crear el mapa de la Pokédex.\n");
+        printf("Error al crear los mapas de la Pokédex.\n");
         return;
     }
 
@@ -105,55 +107,21 @@ void cargar_data(){
         pmon->velocidad = atoi(campos[11]);
         pmon->gen = atoi(campos[12]);
 
-        // Insertar en el mapa de la Pokédex usando el nombre como clave única
+        // Insertar en el mapa de nombres
         map_insert(pokedex, pmon->nombre, pmon);
+
+        // Crear una clave de texto dinámica para el ID e insertar en el mapa por ID
+        char *id_key = (char *)malloc(20 * sizeof(char));
+        if (id_key != NULL) {
+            sprintf(id_key, "%d", pmon->id);
+            map_insert(pokedex_by_id, id_key, pmon);
+        }
     }
     fclose(archivo);
 }
 
-void explorar_pokedex() {
-    if (pokedex == NULL) {
-        printf("\n[!] La Pokédex no ha sido cargada aún.\n");
-        return;
-    }
-
-    char nombre_buscado[100];
-    printf("\nIngrese el nombre del Pokémon a buscar: ");
-    
-    // Limpiar buffer de entrada si queda algún residuo
-    fflush(stdin);
-    
-    // Leer línea con soporte para espacios en blanco
-    // Usamos getchar() si hay un salto de línea acumulado en el buffer
-    int ch;
-    while ((ch = getchar()) != '\n' && ch != EOF);
-    
-    if (fgets(nombre_buscado, sizeof(nombre_buscado), stdin) == NULL) return;
-    
-    // Quitar el salto de línea al final
-    nombre_buscado[strcspn(nombre_buscado, "\r\n")] = '\0';
-
-    // Eliminar espacios al inicio y final del nombre buscado
-    char *trimmed = nombre_buscado;
-    while (*trimmed == ' ') trimmed++;
-    int len = strlen(trimmed);
-    while (len > 0 && trimmed[len - 1] == ' ') {
-        trimmed[len - 1] = '\0';
-        len--;
-    }
-
-    if (strlen(trimmed) == 0) {
-        printf("\n[Error] Nombre inválido.\n");
-        return;
-    }
-
-    MapPair *pair = map_search(pokedex, trimmed);
-    if (pair == NULL) {
-        printf("\n[!] Pokémon \"%s\" no encontrado en la Pokédex.\n", trimmed);
-        return;
-    }
-
-    Pokemon *p = (Pokemon *)pair->value;
+static void mostrar_detalles_pokemon(Pokemon *p) {
+    if (p == NULL) return;
 
     // Normalizar la visualización de tipo2 si está vacío
     char t2_display[30];
@@ -181,18 +149,214 @@ void explorar_pokedex() {
     printf("========================================\n");
 }
 
-void liberar_pokedex() {
+static void buscar_por_nombre() {
     if (pokedex == NULL) return;
 
-    // Iterar y liberar la memoria dinámica asignada a cada Pokémon
-    MapPair *pair = map_first(pokedex);
-    while (pair != NULL) {
-        Pokemon *pmon = (Pokemon *)pair->value;
-        free(pmon);
-        pair = map_next(pokedex);
+    char nombre_buscado[100];
+    printf("\nIngrese el nombre del Pokémon a buscar: ");
+
+    // Limpiar buffer de entrada si queda algún residuo
+    int ch;
+    while ((ch = getchar()) != '\n' && ch != EOF);
+
+    if (fgets(nombre_buscado, sizeof(nombre_buscado), stdin) != NULL) {
+        // Quitar el salto de línea al final
+        nombre_buscado[strcspn(nombre_buscado, "\r\n")] = '\0';
+
+        // Eliminar espacios al inicio y final del nombre buscado
+        char *trimmed = nombre_buscado;
+        while (*trimmed == ' ') trimmed++;
+        int len = strlen(trimmed);
+        while (len > 0 && trimmed[len - 1] == ' ') {
+            trimmed[len - 1] = '\0';
+            len--;
+        }
+
+        if (strlen(trimmed) == 0) {
+            printf("\n[Error] Nombre inválido.\n");
+        } else {
+            MapPair *pair = map_search(pokedex, trimmed);
+            if (pair == NULL) {
+                printf("\n[!] Pokémon \"%s\" no encontrado en la Pokédex.\n", trimmed);
+            } else {
+                Pokemon *p = (Pokemon *)pair->value;
+                mostrar_detalles_pokemon(p);
+            }
+        }
+    }
+    ungetc('\n', stdin);
+    presioneTeclaParaContinuar();
+}
+
+static void buscar_por_id() {
+    if (pokedex_by_id == NULL) return;
+
+    int id_buscado;
+    printf("\nIngrese el número de Pokédex a buscar: ");
+    if (scanf("%d", &id_buscado) != 1) {
+        printf("\n[Error] Entrada no válida.\n");
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+    } else {
+        // Limpiar buffer
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+
+        // Convertir ID a string para buscar en el mapa pokedex_by_id
+        char id_str[20];
+        sprintf(id_str, "%d", id_buscado);
+
+        MapPair *pair = map_search(pokedex_by_id, id_str);
+        if (pair == NULL) {
+            printf("\n[!] Pokémon con número %d no encontrado en la Pokédex.\n", id_buscado);
+        } else {
+            Pokemon *p_encontrado = (Pokemon *)pair->value;
+            mostrar_detalles_pokemon(p_encontrado);
+        }
+    }
+    ungetc('\n', stdin);
+    presioneTeclaParaContinuar();
+}
+
+static void buscar_por_filtro_gen_tipo() {
+    if (pokedex == NULL) return;
+
+    int gen_buscada;
+    char tipo_buscado[50];
+
+    printf("\nIngrese la generación (1-9): ");
+    if (scanf("%d", &gen_buscada) != 1) {
+        printf("\n[Error] Entrada no válida.\n");
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+    } else {
+        printf("Ingrese el tipo de Pokémon: ");
+        // Limpiar buffer antes de leer string
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF);
+
+        if (fgets(tipo_buscado, sizeof(tipo_buscado), stdin) != NULL) {
+            tipo_buscado[strcspn(tipo_buscado, "\r\n")] = '\0';
+
+            // Eliminar espacios al inicio y final
+            char *trimmed_type = tipo_buscado;
+            while (*trimmed_type == ' ') trimmed_type++;
+            int len = strlen(trimmed_type);
+            while (len > 0 && trimmed_type[len - 1] == ' ') {
+                trimmed_type[len - 1] = '\0';
+                len--;
+            }
+
+            if (strlen(trimmed_type) == 0) {
+                printf("\n[Error] Tipo inválido.\n");
+            } else {
+                printf("\n============================================================\n");
+                printf(" POKÉMON ENCONTRADOS (Gen: %d | Tipo: %s)\n", gen_buscada, trimmed_type);
+                printf("============================================================\n");
+                printf(" %-5s | %-25s | %-12s | %-12s | %-5s\n", "ID", "Nombre", "Tipo 1", "Tipo 2", "BST");
+                printf("------------------------------------------------------------\n");
+
+                int encontrados = 0;
+                MapPair *pair = map_first(pokedex);
+                while (pair != NULL) {
+                    Pokemon *p = (Pokemon *)pair->value;
+                    if (p->gen == gen_buscada) {
+                        if (strcasecmp(p->tipo1, trimmed_type) == 0 || strcasecmp(p->tipo2, trimmed_type) == 0) {
+                            // Normalizar la visualización de tipo2
+                            char t2_display[20];
+                            char *t2 = p->tipo2;
+                            while (*t2 == ' ') t2++;
+                            if (strlen(t2) == 0) {
+                                strcpy(t2_display, "Ninguno");
+                            } else {
+                                strcpy(t2_display, t2);
+                            }
+
+                            printf(" %-5d | %-25s | %-12s | %-12s | %-5d\n",
+                                   p->id, p->nombre, p->tipo1, t2_display, p->total_stats);
+                            encontrados++;
+                        }
+                    }
+                    pair = map_next(pokedex);
+                }
+
+                printf("============================================================\n");
+                printf(" Total: %d Pokémon encontrados.\n", encontrados);
+            }
+        }
+    }
+    ungetc('\n', stdin);
+    presioneTeclaParaContinuar();
+}
+
+void menu_explorar_pokedex() {
+    if (pokedex == NULL) {
+        printf("\n[!] La Pokédex no ha sido cargada aún.\n");
+        return;
     }
 
-    // Destruir el TDA Mapa y sus listas internas
-    map_destroy(pokedex);
-    pokedex = NULL;
+    int opcion_sub = 0;
+    while (opcion_sub != 4) {
+        limpiarPantalla();
+        printf("\n========================================\n");
+        printf("            EXPLORAR POKÉDEX            \n");
+        printf("========================================\n");
+        printf("1. Buscar por Nombre\n");
+        printf("2. Buscar por Número de Pokédex\n");
+        printf("3. Buscar con Filtro (Gen y Tipo)\n");
+        printf("4. Volver al menú principal\n");
+        printf("========================================\n");
+        printf("Seleccione una opción: ");
+
+        if (scanf("%d", &opcion_sub) != 1) {
+            printf("\n[Error] Opción no válida. Intente nuevamente.\n");
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF);
+            opcion_sub = 0;
+            continue;
+        }
+
+        switch (opcion_sub) {
+            case 1:
+                buscar_por_nombre();
+                break;
+            case 2:
+                buscar_por_id();
+                break;
+            case 3:
+                buscar_por_filtro_gen_tipo();
+                break;
+            case 4:
+                // Salir del submenú
+                break;
+            default:
+                printf("\n[Error] Opción no válida. Intente nuevamente.\n");
+        }
+    }
+}
+
+void liberar_pokedex() {
+    // 1. Liberar memoria de los Pokémon
+    if (pokedex != NULL) {
+        MapPair *pair = map_first(pokedex);
+        while (pair != NULL) {
+            Pokemon *pmon = (Pokemon *)pair->value;
+            free(pmon);
+            pair = map_next(pokedex);
+        }
+        map_destroy(pokedex);
+        pokedex = NULL;
+    }
+
+    // 2. Liberar las claves dinámicas creadas para el mapa de ID y destruirlo
+    if (pokedex_by_id != NULL) {
+        MapPair *pair = map_first(pokedex_by_id);
+        while (pair != NULL) {
+            char *id_key = (char *)pair->key;
+            free(id_key);
+            pair = map_next(pokedex_by_id);
+        }
+        map_destroy(pokedex_by_id);
+        pokedex_by_id = NULL;
+    }
 }
