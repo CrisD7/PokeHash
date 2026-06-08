@@ -27,7 +27,7 @@ Para iniciar el programa:
 
 ### 1. Explorar Pokédex (Completado)
 Submenú interactivo para consultar el catálogo de Pokémon importado masivamente desde `Pokemon.csv` al iniciar el programa:
-- **1.1. Buscar por Nombre:** Búsqueda directa case-insensitive en la tabla hash. (Eficiencia: promedio $O(1)$).
+- **1.1. Buscar por Nombre:** Búsqueda directa case-insensitive en la tabla hash. Eficiencia promedio de $O(1)$.
 - **1.2. Buscar por Número de Pokédex (ID):** Búsqueda directa indexada en una tabla secundaria de IDs en $O(1)$.
 - **1.3. Buscar con Filtro:** Filtra Pokémon ingresando la generación y el tipo, mostrando los resultados en una tabla alineada en consola.
 
@@ -47,7 +47,7 @@ Submenú interactivo para consultar el catálogo de Pokémon importado masivamen
 Para cumplir con las reglas del proyecto universitario, **todos los TDAs se han implementado desde cero sin librerías externas**:
 
 1. **TDA Mapa (Tabla Hash con Chaining):**
-   - Implementado en [map.c](file:///home/cris/PokeHash/PokeHash/tdas/map.c) usando una función de hashing (DJB2) y resolución de colisiones mediante listas enlazadas. Se utilizan dos instancias globales para lograr búsquedas instantáneas $O(1)$ tanto por Nombre como por ID.
+   - Implementado en [map.c] usando una función de hashing (DJB2) y resolución de colisiones mediante listas enlazadas. Se utilizan dos instancias globales para lograr búsquedas instantáneas $O(1)$ tanto por Nombre como por ID.
 2. **TDA Pila (Stack de Arreglo Estático):**
    - Utilizado para gestionar el equipo activo. Al estar acotado estrictamente a 6 miembros, modela a la perfección la operación de deshacer (Undo) bajo la lógica LIFO (Last In, First Out).
 3. **TDA Grafo (Matriz de Adyacencia):**
