@@ -5,6 +5,7 @@
 
 Map *pokedex = NULL;
 Map *pokedex_by_id = NULL;
+float matrizDebilidades[NUM_TIPOS][NUM_TIPOS];
 
 void mostrarMenu() {
     printf("\n========================================\n");
@@ -359,4 +360,60 @@ void liberar_pokedex() {
         map_destroy(pokedex_by_id);
         pokedex_by_id = NULL;
     }
+}
+
+
+/*
+void analizar_debilidades(Equipo *e) {
+    if (e == NULL) return;
+    if (e->tope == 0) {
+        printf("\n[!] El equipo está vacío. No hay Pokémon para analizar.\n");
+        return;
+    }
+
+    for (int i = 0 ; i < e->tope ; i++) {
+        Pokemon *p = e->integrantes[i];
+        printf("\nDebilidades de %s:\n", p->nombre);
+        printf("Tipo 1: %s | Tipo 2: %s\n", p->tipo1, strlen(p->tipo2) > 0 ? p->tipo2 : "Ninguno");
+
+        
+        
+        //El algoritmo itera sobre los ‘k’ Pokémon actualmente en
+        //la Pila. Por cada uno, extrae sus tipos y consulta la Matriz de Adyacencia
+        //iterando sobre los ‘t’ tipos posibles (18), acumulando los multiplicadores en un
+        //arreglo temporal de vulnerabilidades.
+        
+
+    }
+}
+*/
+
+void cargar_matriz_debilidades(){
+    //este bloque podría ser cargar_data() jejej
+    FILE *archivo = fopen("Tabla.csv", "r");
+    if(archivo == NULL){
+        perror("Error al abrir el archivo");
+        return;
+    }
+
+    char linea[200];
+    // Ignora la línea de cabecera
+    if (fgets(linea, sizeof(linea), archivo) == NULL) {
+        fclose(archivo);
+        return;
+    }
+
+    int fil = 0;
+    while (fgets(linea, sizeof(linea), archivo) && fil < NUM_TIPOS) {
+        char *token = strtok(linea, ","); // guarda la palabra (el tipo)
+        int col = 0;
+        token = strtok(NULL, ",")
+        while (token != NULL && col < NUM_TIPOS) {
+            matrizDebilidades[fil][col] = atof(token);
+            token = strtok(NULL, ",");
+            columna++;
+        }
+        fila++;
+    }
+    fclose(archivo);
 }
