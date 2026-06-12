@@ -18,9 +18,7 @@ int main() {
                 menu_explorar_pokedex();
                 break;
             case 2:
-                limpiarPantalla();
-                printf("\n[!] Has entrado a Gestión de Equipo.\n");
-                
+                menu_gestion_equipo(&miEquipo);
                 break;
             case 3:
                 limpiarPantalla();

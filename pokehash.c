@@ -389,7 +389,6 @@ void analizar_debilidades(Equipo *e) {
 */
 
 void cargar_matriz_debilidades(){
-    //este bloque podría ser cargar_data() jejej
     FILE *archivo = fopen("Tabla.csv", "r");
     if(archivo == NULL){
         perror("Error al abrir el archivo");
@@ -407,13 +406,134 @@ void cargar_matriz_debilidades(){
     while (fgets(linea, sizeof(linea), archivo) && fil < NUM_TIPOS) {
         char *token = strtok(linea, ","); // guarda la palabra (el tipo)
         int col = 0;
-        token = strtok(NULL, ",")
+        token = strtok(NULL, ",");
         while (token != NULL && col < NUM_TIPOS) {
             matrizDebilidades[fil][col] = atof(token);
             token = strtok(NULL, ",");
-            columna++;
+            col++;
         }
-        fila++;
+        fil++;
     }
     fclose(archivo);
+}
+
+void agregar_pokemon_equipo(Equipo *e) {
+    if (pokedex == NULL) {
+        printf("\n[!] La Pokédex no ha sido cargada aún.\n");
+        return;
+    }
+
+    if (e->tope >= 6) {
+        printf("\n[Error] El equipo está completo (máximo 6 Pokémon).\n");
+        presioneTeclaParaContinuar();
+        return;
+    }
+
+    char nombre_buscado[100];
+    printf("\nIngrese el nombre del Pokémon a agregar al equipo: ");
+
+    // Limpiar buffer de entrada si queda algún residuo
+    int ch;
+    while ((ch = getchar()) != '\n' && ch != EOF);
+
+    if (fgets(nombre_buscado, sizeof(nombre_buscado), stdin) != NULL) {
+        // Quitar el salto de línea al final
+        nombre_buscado[strcspn(nombre_buscado, "\r\n")] = '\0';
+
+        // Eliminar espacios al inicio y final del nombre buscado
+        char *trimmed = nombre_buscado;
+        while (*trimmed == ' ') trimmed++;
+        int len = strlen(trimmed);
+        while (len > 0 && trimmed[len - 1] == ' ') {
+            trimmed[len - 1] = '\0';
+            len--;
+        }
+
+        if (strlen(trimmed) == 0) {
+            printf("\n[Error] Nombre inválido.\n");
+        } else {
+            MapPair *pair = map_search(pokedex, trimmed);
+            if (pair == NULL) {
+                printf("\n[!] Pokémon \"%s\" no encontrado en la Pokédex.\n", trimmed);
+            } else {
+                Pokemon *p = (Pokemon *)pair->value;
+                e->integrantes[e->tope] = p;
+                e->tope++;
+                printf("\n[!] ¡%s ha sido añadido exitosamente al equipo! (Espacios ocupados: %d/6)\n", p->nombre, e->tope);
+            }
+        }
+    }
+    ungetc('\n', stdin);
+    presioneTeclaParaContinuar();
+}
+
+void ver_equipo_actual(Equipo *e) {
+    if (e->tope == 0) {
+        printf("\n[!] El equipo está vacío. Agregue Pokémon primero.\n");
+        presioneTeclaParaContinuar();
+        return;
+    }
+
+    printf("\n================================================================================\n");
+    printf("                            INTEGRANTES DEL EQUIPO                              \n");
+    printf("================================================================================\n");
+    for (int i = 0; i < e->tope; i++) {
+        Pokemon *p = e->integrantes[i];
+        
+        // Normalizar la visualización de tipo2 si está vacío
+        char t2_display[30];
+        char *t2 = p->tipo2;
+        while (*t2 == ' ') t2++;
+        if (strlen(t2) == 0) {
+            strcpy(t2_display, "Ninguno");
+        } else {
+            strcpy(t2_display, t2);
+        }
+
+        printf(" [%d] %-20s (ID: %-3d) | Tipo 1: %-8s | Tipo 2: %-8s\n", i + 1, p->nombre, p->id, p->tipo1, t2_display);
+        printf("     HP: %-3d | ATK: %-3d | DEF: %-3d | SPA: %-3d | SPD: %-3d | SPE: %-3d | Total: %d\n", 
+               p->hp, p->ataque, p->defensa, p->ataque_esp, p->defensa_esp, p->velocidad, p->total_stats);
+        printf("--------------------------------------------------------------------------------\n");
+    }
+    printf(" Espacios ocupados: %d/6\n", e->tope);
+    printf("================================================================================\n");
+    presioneTeclaParaContinuar();
+}
+
+void menu_gestion_equipo(Equipo *e) {
+    int opcion_sub = 0;
+    while (opcion_sub != 3) {
+        limpiarPantalla();
+        printf("\n========================================\n");
+        printf("       GESTIÓN ESTRATÉGICA DE EQUIPO    \n");
+        printf("========================================\n");
+        printf("1. Agregar Pokémon al Equipo\n");
+        printf("2. Ver Equipo Actual\n");
+        printf("3. Volver al menú principal\n");
+        printf("========================================\n");
+        printf("Seleccione una opción: ");
+
+        if (scanf("%d", &opcion_sub) != 1) {
+            printf("\n[Error] Opción no válida. Intente nuevamente.\n");
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF);
+            opcion_sub = 0;
+            continue;
+        }
+
+        switch (opcion_sub) {
+            case 1:
+                agregar_pokemon_equipo(e);
+                break;
+            case 2:
+                ver_equipo_actual(e);
+                break;
+            case 3:
+                // Volver
+                break;
+            default:
+                printf("\n[Error] Opción no válida. Intente nuevamente.\n");
+                presioneTeclaParaContinuar();
+        }
+    }
 }

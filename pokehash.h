@@ -44,5 +44,8 @@ void menu_explorar_pokedex();
 void liberar_pokedex();
 
 void cargar_matriz_debilidades();
+void menu_gestion_equipo(Equipo* e);
+void agregar_pokemon_equipo(Equipo* e);
+void ver_equipo_actual(Equipo* e);
 
 #endif
