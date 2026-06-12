@@ -41,6 +41,7 @@ void mostrarMenu();
 void inicializarEquipo(Equipo* e);
 void cargar_data();
 void menu_explorar_pokedex();
+void mejores10PorStat();
 void liberar_pokedex();
 
 void cargar_matriz_debilidades();
