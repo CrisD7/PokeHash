@@ -446,7 +446,7 @@ void mejores10PorStat()
                 presioneTeclaParaContinuar();
                 continue;
             }
-
+            limpiarPantalla();
             printf("\n==================================================================================\n");
             printf("Stats disponibles : \n");
             printf("1. HP | 2. Ataque | 3. Defensa | 4. Ataque Esp. | 5. Defensa Esp. | 6. Velocidad\n");
@@ -526,7 +526,7 @@ void mejores10PorStat()
                 }
                 pair = map_next(pokedex);
             }
-
+            limpiarPantalla();
             printf("\n=================================================================\n");
             printf(" TOP 10 POKÉMON POR : %s", obtenerNombreStat(stat1));
             if (opcion_menu == 2) printf(" + %s", obtenerNombreStat(stat2));
