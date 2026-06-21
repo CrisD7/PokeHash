@@ -1,0 +1,145 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-tabla]{babel}
+\usepackage{geometry}
+\geometry{top=2.5cm, bottom=2.5cm, left=3cm, right=3cm}
+\usepackage{graphicx}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{color}
+
+% Enlaces amigables
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={PokeHash - Informe Final},
+    pdfpagemode=FullScreen,
+}
+
+% Configuración de listings para código C
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{CStyle}{
+    backgroundcolor=\color{backgroundColour},   
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C
+}
+
+\begin{document}
+
+% ==================== PORTADA ====================
+\begin{titlepage}
+    \centering
+    \setstretch{1.15}
+    {\large\bfseries PONTIFICIA UNIVERSIDAD CATÓLICA DE VALPARAÍSO}\\[0.2cm]
+    {\large FACULTAD DE INGENIERÍA}\\[0.2cm]
+    {\large ESCUELA DE INGENIERÍA INFORMÁTICA}\\[2.5cm]
+
+    % Caja estética en lugar de imagen externa para evitar errores de compilación
+    \begin{center}
+        \setlength{\unitlength}{1mm}
+        \begin{picture}(50,20)
+            \put(0,0){\framebox(50,20){\bfseries POKE-HASH}}
+        \end{picture}
+    \end{center}
+    \vspace{1.5cm}
+
+    {\Huge\bfseries PokeHash: Gestor Táctico de Pokémon}\\[0.4cm]
+    {\large\bfseries Un Sistema Eficiente de Indexación y Análisis de Debilidades}\\[0.8cm]
+    {\large Informe Final de Proyecto --- Asignatura: Estructuras de Datos}\\[2.5cm]
+
+    \begin{flushright}
+        \textbf{Integrantes:}\\[0.1cm]
+        Cristóbal Sazo\\
+        Sebastián Riveros\\
+        Simón Guzmán\\
+        Bruno Orellana\\[0.6cm]
+        \textbf{Profesor:}\\
+        Ignacio Araya\\[0.6cm]
+        \textbf{Fecha:}\\
+        \today
+    \end{flushright}
+
+    \vfill
+    {\small Valparaíso, Chile}
+\end{titlepage}
+
+\newpage
+\pagenumbering{roman}
+
+% ==================== ÍNDICE ====================
+\tableofcontents
+\newpage
+
+\pagenumbering{arabic}
+\setstretch{1.25}
+
+% ==================== SECCIÓN 1: INTRODUCCIÓN ====================
+\section{Introducción}
+
+\subsection{Contextualización y Propósito}
+El universo Pokémon se caracteriza por una compleja red de interacciones estratégicas entre tipos elementales, estadísticas de combate y sinergias grupales. Con el auge del formato competitivo formal (como el formato VGC oficial de \emph{The Pokémon Company} o la plataforma comunitaria \emph{Smogon}), la planificación táctica se ha convertido en un requisito indispensable para los jugadores. Al construir un equipo de seis integrantes, el usuario debe equilibrar la distribución de estadísticas (puntos de vida, ataque, defensa, velocidad) y, de forma crucial, mitigar las debilidades elementales frente a los 18 tipos elementales existentes.
+
+Actualmente, este proceso de planificación adolece de un vacío práctico: los jugadores se ven obligados a recurrir constantemente a herramientas externas, tales como wikis web, hojas de cálculo o calculadoras en línea. Estas soluciones fragmentan la experiencia de juego, dependen de una conexión a Internet activa y no ofrecen una interfaz unificada que permita indexar masivamente el catálogo completo de criaturas junto con un gestor ágil de composición de equipo.
+
+En respuesta a esta necesidad, surge \textbf{PokeHash}, una aplicación interactiva diseñada para la consola de comandos. Su propósito es consolidar en una única herramienta offline un catálogo completo de Pokémon, con motores de búsqueda extremadamente rápidos y un evaluador táctico que identifique con precisión matemática las vulnerabilidades de la escuadra actual.
+
+\subsection{Visión General}
+PokeHash es un gestor táctico que procesa y organiza una base de datos local de Pokémon. Su diseño está orientado a la máxima eficiencia temporal mediante el uso de Estructuras de Datos personalizadas.
+
+Las principales capacidades y funcionalidades que componen el sistema son:
+\begin{itemize}
+    \item \textbf{Carga Masiva de Datos:} Inicialización automatizada del catálogo mediante la lectura del archivo estructurado \texttt{Pokemon.csv} y la matriz de relaciones de tipo elemental contenida en \texttt{Tabla.csv}.
+    \item \textbf{Exploración Eficiente de la Pokédex:} Búsquedas instantáneas parametrizadas por dos vías de indexación paralela: a través del nombre exacto de la criatura o mediante su identificador numérico oficial.
+    \item \textbf{Filtrado Avanzado por Categorías:} Búsqueda con filtros compuestos que seleccionan Pokémon en base a su generación de origen (1-9) y a su tipo elemental predominante o secundario.
+    \item \textbf{Análisis de los Mejores Ejemplares (Top 10):} Generación de clasificaciones competitivas de los mejores 10 Pokémon basándose en una o la combinación sumada de dos estadísticas base distintas, aplicando filtros opcionales de tipo o generación.
+    \item \textbf{Gestión de Equipo con Deshacer Táctico:} Construcción dinámica de un equipo con un límite de hasta 6 integrantes, integrando una mecánica de reversión de acción (Undo/Deshacer) para eliminar de forma inmediata al último integrante incorporado en caso de error de selección.
+    \item \textbf{Evaluación de Vulnerabilidades:} Análisis en tiempo real de la composición elemental del equipo, determinando el balance defensivo mediante el cruce de multiplicadores de daño.
+    \item \textbf{Exportación de Estrategia:} Guardado del equipo estructurado junto con su reporte analítico de debilidades directamente en un archivo de texto plano local.
+\end{itemize}
+
+\paragraph{Alcance y Limitaciones:}
+PokeHash destaca por su velocidad de consulta $O(1)$ en memoria y su nulo consumo de red, permitiendo flujos de análisis fluidos y ágiles en entornos de consola. Sin embargo, no está diseñado para:
+\begin{enumerate}
+    \item Simular batallas en tiempo real o calcular daño dinámico de movimientos (ataques específicos).
+    \item Gestionar más de un equipo simultáneo en memoria de forma persistente sin exportar a un archivo.
+    \item Ofrecer interfaces gráficas multimedia pesadas de forma nativa en su núcleo de C, priorizando la legibilidad, la robustez de los punteros y el rendimiento matemático puro.
+\end{enumerate}
+
+\subsection{Generación de Interés e Innovación}
+La principal innovación de PokeHash radica en su arquitectura interna de datos. A diferencia de las bases de datos relacionales convencionales o las búsquedas lineales de orden $O(n)$ en arreglos que típicamente ralentizan las aplicaciones de consola en C, PokeHash implementa un esquema de **indexación dual** por medio de dos Tablas Hash personalizadas que operan en paralelo (\texttt{pokedex} y \texttt{pokedex\_by\_id}). Esto garantiza que tanto las búsquedas alfabéticas por nombre como las búsquedas numéricas por ID de Pokédex se realicen en tiempo constante $O(1)$ en promedio.
+
+Adicionalmente, el cruce relacional del daño se modela como un Grafo Dirigido representado de manera estática a través de una Matriz de Adyacencia de $18\times18$. Esta elección de diseño permite realizar consultas de efectividad elemental de forma inmediata en tiempo $O(1)$, maximizando el rendimiento al evaluar las debilidades del equipo completo.
+
+La integración coordinada de la Tabla Hash para el catálogo, la estructura de Pila LIFO (Last-In, First-Out) para la lógica de selección de equipo con deshacer, y la matriz de adyacencia para las debilidades elementales, convierte a PokeHash en una solución de ingeniería robusta, de alta velocidad computacional y de gran interés para el aprendizaje práctico de la gestión de memoria dinámica en el lenguaje C.
+
+\end{document}

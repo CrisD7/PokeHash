@@ -550,8 +550,8 @@ void mejores10PorStat()
                 {
                     if (top10_pokemons[i] != NULL)
                     {
-                        char nombreConId[100];
-                        sprintf(nombreConId, "%s (%d)", top10_pokemons[i]->nombre, top10_pokemons[i]->id);
+                        char nombreConId[120];
+                        snprintf(nombreConId, sizeof(nombreConId), "%s (%d)", top10_pokemons[i]->nombre, top10_pokemons[i]->id);
                         printf(" %-4d | %-30s | %-10d\n", i + 1, nombreConId, top10Puntaje[i]);
                     }
                 }
@@ -731,14 +731,15 @@ void ver_equipo_actual(Equipo *e) {
 
 void menu_gestion_equipo(Equipo *e) {
     int opcion_sub = 0;
-    while (opcion_sub != 3) {
+    while (opcion_sub != 4) {
         limpiarPantalla();
         printf("\n========================================\n");
         printf("       GESTIÓN ESTRATÉGICA DE EQUIPO    \n");
         printf("========================================\n");
         printf("1. Agregar Pokémon al Equipo\n");
         printf("2. Ver Equipo Actual\n");
-        printf("3. Volver al menú principal\n");
+        printf("3. Deshacer última adición\n");
+        printf("4. Volver al menú principal\n");
         printf("========================================\n");
         printf("Seleccione una opción: ");
 
@@ -758,6 +759,17 @@ void menu_gestion_equipo(Equipo *e) {
                 ver_equipo_actual(e);
                 break;
             case 3:
+                // Deshacer última adición: operación LIFO O(1)
+                if (e->tope > 0) {
+                    e->tope--;
+                    printf("\n[!] Última acción revertida. ");
+                    printf("El equipo vuelve a tener %d integrante(s).\n", e->tope);
+                } else {
+                    printf("\n[!] El equipo ya está vacío. No hay nada que deshacer.\n");
+                }
+                presioneTeclaParaContinuar();
+                break;
+            case 4:
                 // Volver
                 break;
             default:
