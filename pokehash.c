@@ -3,6 +3,12 @@
 #include <strings.h>
 #include <ctype.h>
 
+const char *NOMBRES_TIPOS[NUM_TIPOS] = {
+        "Normal", "Fire", "Water", "Electric", "Grass", "Ice", "Fighting", "Poison",
+        "Ground", "Flying", "Psychic", "Bug", "Rock", "Ghost", "Dragon",
+        "Dark", "Steel", "Fairy"
+    };
+
 Map *pokedex = NULL;
 Map *pokedex_by_id = NULL;
 float matrizDebilidades[NUM_TIPOS][NUM_TIPOS];
@@ -568,31 +574,20 @@ void liberar_pokedex() {
     }
 }
 
-
-/*
-void analizar_debilidades(Equipo *e) {
-    if (e == NULL) return;
-    if (e->tope == 0) {
-        printf("\n[!] El equipo está vacío. No hay Pokémon para analizar.\n");
-        return;
-    }
-
-    for (int i = 0 ; i < e->tope ; i++) {
-        Pokemon *p = e->integrantes[i];
-        printf("\nDebilidades de %s:\n", p->nombre);
-        printf("Tipo 1: %s | Tipo 2: %s\n", p->tipo1, strlen(p->tipo2) > 0 ? p->tipo2 : "Ninguno");
-
-        
-        
-        //El algoritmo itera sobre los ‘k’ Pokémon actualmente en
-        //la Pila. Por cada uno, extrae sus tipos y consulta la Matriz de Adyacencia
-        //iterando sobre los ‘t’ tipos posibles (18), acumulando los multiplicadores en un
-        //arreglo temporal de vulnerabilidades.
-        
-
-    }
+const char* obtener_nombre_tipo (int indice) {
+    if (indice < 0 || indice >= NUM_TIPOS) return NULL;
+    return NOMBRES_TIPOS[indice];
 }
-*/
+
+int obtener_indice_tipo(const char *tipo) {
+    if (tipo == NULL) return -1;
+    for (int i = 0; i < NUM_TIPOS; i++) {
+        if (strcasecmp(tipo, NOMBRES_TIPOS[i]) == 0) {
+            return i;
+        }
+    }
+    return -1; // Tipo no encontrado
+}
 
 void cargar_matriz_debilidades(){
     FILE *archivo = fopen("Tabla.csv", "r");
@@ -621,6 +616,96 @@ void cargar_matriz_debilidades(){
         fil++;
     }
     fclose(archivo);
+}
+
+void analizar_debilidades(Equipo *e) {
+    if (e == NULL) return;
+    if (e->tope == 0) {
+        printf("\n[!] El equipo está vacío. No hay Pokémon para analizar.\n");
+        return;
+    }
+
+    int conteo_debilidades_equipo[NUM_TIPOS] = {0};
+    int hay_debilidad_x4_global = 0;
+
+    printf("\n==================================================\n");
+    printf("           ANÁLISIS TÁCTICO DEL EQUIPO            \n");
+    printf("==================================================\n");
+
+    for (int i = 0 ; i < e->tope ; i++) {
+        Pokemon *p = e->integrantes[i];
+
+        int tiene_debilidades_individuales = 0;
+
+        List *debilidades = list_create();
+        if (debilidades == NULL) return;
+
+        printf("\n> %s (Tipo: %s / %s):\n", p->nombre, p->tipo1, 
+               (strlen(p->tipo2) > 0 && strcmp(p->tipo2, " ") != 0) ? p->tipo2 : "Ninguno");
+
+        for (int j = 0 ; j < NUM_TIPOS ; j++) {
+            float multiplicador = 1.0;
+
+            // tipo1
+            int tipo1_index = obtener_indice_tipo(p->tipo1);
+            if (tipo1_index != -1) {
+                multiplicador *= matrizDebilidades[j][tipo1_index];
+            }
+            
+            // Verificar tipo2
+            char *t2 = p->tipo2;
+            while (*t2 == ' ') t2++;
+            if (strlen(t2) > 0) {
+                int tipo2_index = obtener_indice_tipo(t2);
+                if (tipo2_index != -1) {
+                    multiplicador *= matrizDebilidades[j][tipo2_index];
+                }
+            }
+
+            if (multiplicador > 1.0) {
+                tiene_debilidades_individuales = 1;
+                const char *nombre_tipo_debil = obtener_nombre_tipo(j);
+
+                list_pushBack(debilidades, (void *)nombre_tipo_debil);
+                conteo_debilidades_equipo[j]++;
+
+                if (multiplicador > 2.0) {
+                    printf("  [CRÍTICO] ¡Débil x4 al tipo %s!\n", nombre_tipo_debil);
+                    hay_debilidad_x4_global = 1;
+                }
+                else {
+                    printf("  - Débil al tipo %s (x2)\n", nombre_tipo_debil);
+                }
+            }
+        }
+
+        if (!tiene_debilidades_individuales) {
+            printf("  - ¡No tiene debilidades elementales! (Excelente cobertura)\n");
+        }
+
+        list_clean(debilidades);
+        free(debilidades);
+    }
+
+    printf("\n==================================================\n");
+    printf("         ALERTAS DE COBERTURA GLOBAL             \n");
+    printf("==================================================\n");
+
+    int hay_debilidades_compartidas = 0;
+    for (int j = 0 ; j < NUM_TIPOS ; j++) {
+        if (conteo_debilidades_equipo[j] >= 2) {
+            printf("[ALERTA] %d integrantes de tu equipo son débiles al tipo: %s\n", 
+                   conteo_debilidades_equipo[j], obtener_nombre_tipo(j));
+            hay_debilidades_compartidas = 1;
+        }
+    }
+
+    if (!hay_debilidades_compartidas && !hay_debilidad_x4_global) {
+        printf("[OK] ¡Tu equipo tiene una excelente sinergia de tipos! Sin debilidades críticas compartidas.\n");
+    }
+    printf("==================================================\n");
+    
+    presioneTeclaParaContinuar();
 }
 
 void agregar_pokemon_equipo(Equipo *e) {
