@@ -36,6 +36,7 @@ typedef struct {
 
 extern Map *pokedex;
 extern Map *pokedex_by_id;
+extern const char *NOMBRES_TIPOS[NUM_TIPOS];
 
 void mostrarMenu();
 void inicializarEquipo(Equipo* e);
@@ -44,7 +45,10 @@ void menu_explorar_pokedex();
 void mejores10PorStat();
 void liberar_pokedex();
 
+const char* obtener_nombre_tipo (int indice);
+int obtener_indice_tipo(const char *tipo);
 void cargar_matriz_debilidades();
+void analizar_debilidades(Equipo *e);
 void menu_gestion_equipo(Equipo* e);
 void agregar_pokemon_equipo(Equipo* e);
 void ver_equipo_actual(Equipo* e);
