@@ -370,18 +370,15 @@ static const char* obtenerNombreStat(int opcionStat)
     }
 }
 
-void mejores10PorStat()
-{
-    if (pokedex == NULL)
-    {
+void mejores10PorStat(){
+    if (pokedex == NULL){
     printf("\n[!] La Pokédex no ha sido cargada aún.\n");
     presioneTeclaParaContinuar();
     return;
     }
 
     int opcion_menu = 0;
-    while (opcion_menu != 3)
-    {
+    while (opcion_menu != 3){
         limpiarPantalla();
         printf("\n========================================\n");
         printf("              MEJORES 10 POR STAT         \n");
@@ -392,8 +389,7 @@ void mejores10PorStat()
         printf("========================================\n");
         printf("Seleccione una opción : ");
 
-        if (scanf("%d", &opcion_menu) != 1)
-        {
+        if (scanf("%d", &opcion_menu) != 1){
             printf("\n[ERROR] Selección invalida.\n");
             int c;
             while ((c = getchar()) != '\n' && c != EOF);
@@ -404,8 +400,7 @@ void mejores10PorStat()
 
         if (opcion_menu == 3) break;
 
-        if (opcion_menu == 1 || opcion_menu == 2)
-        {
+        if (opcion_menu == 1 || opcion_menu == 2){
             int opcionFiltro = 0;
             int genFiltro = 0;
             char tipoFiltro[50] = "";
@@ -420,18 +415,15 @@ void mejores10PorStat()
             printf("Seleccione una opción : ");
             scanf("%d", &opcionFiltro);
 
-            if (opcionFiltro == 2)
-            {
+            if (opcionFiltro == 2){
                 printf("Ingrese la generación a filtrar (1-9) : ");
                 scanf("%d", &genFiltro);
             }
-            else if (opcionFiltro == 3)
-            {
+            else if (opcionFiltro == 3){
                 printf("Ingrese el tipo a filtrar : ");
                 int ch;
                 while ((ch = getchar()) != '\n' && ch != EOF);
-                if (fgets(tipoFiltro, sizeof(tipoFiltro), stdin) != NULL)
-                {
+                if (fgets(tipoFiltro, sizeof(tipoFiltro), stdin) != NULL){
                     tipoFiltro[strcspn(tipoFiltro, "\r\n")] = '\0';
                     char *t = tipoFiltro;
                     while (*t == ' ') t++;
@@ -440,8 +432,7 @@ void mejores10PorStat()
                     strcpy(tipoFiltro, t);
                 }
             }
-            else if (opcionFiltro != 1)
-            {
+            else if (opcionFiltro != 1){
                 printf("\n[ERROR] Selección invalida.\n");
                 presioneTeclaParaContinuar();
                 continue;
@@ -456,14 +447,12 @@ void mejores10PorStat()
             printf("Seleccione la %sstat (1-6) : ", opcion_menu == 2 ? "primera" : "");
             scanf("%d", &stat1);
 
-            if (opcion_menu == 2)
-            {
+            if (opcion_menu == 2){
                 printf("Seleccione la segunda stat (1-6) : ");
                 scanf("%d", &stat2);
             }
 
-            if (stat1 < 1 || stat1 > 6 || (opcion_menu == 2 && (stat2 < 1 || stat2 > 6)))
-            {
+            if (stat1 < 1 || stat1 > 6 || (opcion_menu == 2 && (stat2 < 1 || stat2 > 6))){
                 printf("\n[ERROR] Selección de stat invalida.\n");
                 int c;
                 while ((c = getchar()) != '\n' && c != EOF);
@@ -473,8 +462,7 @@ void mejores10PorStat()
 
             Pokemon* top10_pokemons[10];
             int top10Puntaje[10];
-            for (int i = 0 ; i < 10 ; i++)
-            {
+            for (int i = 0 ; i < 10 ; i++){
                 top10_pokemons[i] = NULL;
                 top10Puntaje[i] = -1;
             }
@@ -482,20 +470,16 @@ void mejores10PorStat()
             MapPair *pair = map_first(pokedex);
             int evaluados = 0;
 
-            while (pair != NULL)
-            {
+            while (pair != NULL){
                 Pokemon *p = (Pokemon *) pair->value;
 
-                if (opcionFiltro == 2 && p->gen != genFiltro)
-                {
+                if (opcionFiltro == 2 && p->gen != genFiltro){
                     pair = map_next(pokedex);
                     continue;
                 }
 
-                if (opcionFiltro == 3)
-                {
-                    if (strcasecmp(p->tipo1, tipoFiltro) != 0 && strcasecmp(p->tipo2, tipoFiltro) != 0)
-                    {
+                if (opcionFiltro == 3){
+                    if (strcasecmp(p->tipo1, tipoFiltro) != 0 && strcasecmp(p->tipo2, tipoFiltro) != 0){
                         pair = map_next(pokedex);
                         continue;
                     }
@@ -504,20 +488,16 @@ void mejores10PorStat()
                 evaluados++;
 
                 int puntaje = obtenerStat(p, stat1);
-                if (opcion_menu == 2)
-                {
+                if (opcion_menu == 2){
                     puntaje += obtenerStat(p, stat2);
                 }
 
-                if (puntaje > top10Puntaje[9])
-                {
+                if (puntaje > top10Puntaje[9]){
                     int pos = 9;
-                    while (pos > 0 && puntaje > top10Puntaje[pos-1])
-                    {
+                    while (pos > 0 && puntaje > top10Puntaje[pos-1]){
                         pos--;
                     }
-                    for (int i = 9 ; i > pos ; i--)
-                    {
+                    for (int i = 9 ; i > pos ; i--){
                         top10Puntaje[i] = top10Puntaje[i-1];
                         top10_pokemons[i] = top10_pokemons[i-1];
                     }
@@ -536,18 +516,15 @@ void mejores10PorStat()
             else printf(" (Global)\n");
             printf("=================================================================\n");
 
-            if (evaluados == 0)
-            {
+            if (evaluados == 0){
                 printf(" [!] No se encontraron Pokémon que cumplan con el filtro.\n");
                 printf("=================================================================\n");
             }
-            else
-            {
+            else{
                 printf(" %-4s | %-30s | %-10s\n", "Pos", "Nombre (ID)", "Puntaje");
                 printf("=================================================================\n");
 
-                for (int i = 0 ; i < 10 ; i++)
-                {
+                for (int i = 0 ; i < 10 ; i++){
                     if (top10_pokemons[i] != NULL)
                     {
                         char nombreConId[120];
@@ -647,6 +624,7 @@ void cargar_matriz_debilidades(){
 }
 
 void agregar_pokemon_equipo(Equipo *e) {
+    limpiarPantalla();
     if (pokedex == NULL) {
         printf("\n[!] La Pokédex no ha sido cargada aún.\n");
         return;
@@ -698,6 +676,7 @@ void agregar_pokemon_equipo(Equipo *e) {
 
 void ver_equipo_actual(Equipo *e) {
     if (e->tope == 0) {
+        limpiarPantalla();
         printf("\n[!] El equipo está vacío. Agregue Pokémon primero.\n");
         presioneTeclaParaContinuar();
         return;

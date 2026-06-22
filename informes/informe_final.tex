@@ -1,93 +1,99 @@
 \documentclass[12pt, letterpaper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[spanish, es-tabla]{babel}
+\addto\extrasspanish{\shorthandoff{"}} % Evita que "I -> Ï, "C -> Ç dentro de \texttt{}
 \usepackage{geometry}
 \geometry{top=2.5cm, bottom=2.5cm, left=3cm, right=3cm}
-\usepackage{graphicx}
 \usepackage{setspace}
-\onehalfspacing
 \usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{float}
-\usepackage{titlesec}
 \usepackage{fancyhdr}
 \usepackage{listings}
-\usepackage{color}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{graphicx}
 
-% Enlaces amigables
+\onehalfspacing
+
+% --- Encabezado y pie de página ---
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\small PokeHash --- Informe Final}
+\lhead{\small Estructuras de Datos --- PUCV}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --- Hipervínculos ---
 \hypersetup{
     colorlinks=true,
-    linkcolor=blue,
-    filecolor=magenta,      
-    urlcolor=cyan,
+    linkcolor=blue!80!black,
+    urlcolor=cyan!70!black,
     pdftitle={PokeHash - Informe Final},
-    pdfpagemode=FullScreen,
 }
 
-% Configuración de listings para código C
-\definecolor{mGreen}{rgb}{0,0.6,0}
-\definecolor{mGray}{rgb}{0.5,0.5,0.5}
-\definecolor{mPurple}{rgb}{0.58,0,0.82}
-\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+% --- Estilo de bloques de código C ---
+\definecolor{codegray}{rgb}{0.95,0.95,0.95}
+\definecolor{codegreen}{rgb}{0.0,0.45,0.0}
+\definecolor{codepurple}{rgb}{0.45,0.0,0.75}
+\definecolor{codeblue}{rgb}{0.0,0.0,0.75}
+\definecolor{coderule}{rgb}{0.7,0.7,0.7}
 
 \lstdefinestyle{CStyle}{
-    backgroundcolor=\color{backgroundColour},   
-    commentstyle=\color{mGreen},
-    keywordstyle=\color{blue},
-    numberstyle=\tiny\color{mGray},
-    stringstyle=\color{mPurple},
+    backgroundcolor=\color{codegray},
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\tiny\color{gray},
+    stringstyle=\color{codepurple},
     basicstyle=\footnotesize\ttfamily,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=6pt,
     showstringspaces=false,
-    showtabs=false,                  
-    tabsize=2,
-    language=C
+    tabsize=4,
+    language=C,
+    frame=single,
+    rulecolor=\color{coderule},
+    xleftmargin=1em,
 }
+\lstset{style=CStyle}
 
+% =====================================================
 \begin{document}
+% =====================================================
 
 % ==================== PORTADA ====================
 \begin{titlepage}
     \centering
-    \setstretch{1.15}
-    {\large\bfseries PONTIFICIA UNIVERSIDAD CATÓLICA DE VALPARAÍSO}\\[0.2cm]
-    {\large FACULTAD DE INGENIERÍA}\\[0.2cm]
-    {\large ESCUELA DE INGENIERÍA INFORMÁTICA}\\[2.5cm]
+    \setstretch{1.1}
+    {\large\bfseries PONTIFICIA UNIVERSIDAD CATÓLICA DE VALPARAÍSO}\\[0.15cm]
+    {\large FACULTAD DE INGENIERÍA}\\[0.15cm]
+    {\large ESCUELA DE INGENIERÍA INFORMÁTICA}\\[3cm]
 
-    % Caja estética en lugar de imagen externa para evitar errores de compilación
-    \begin{center}
-        \setlength{\unitlength}{1mm}
-        \begin{picture}(50,20)
-            \put(0,0){\framebox(50,20){\bfseries POKE-HASH}}
-        \end{picture}
-    \end{center}
-    \vspace{1.5cm}
+    {\Huge\bfseries PokeHash}\\[0.35cm]
+    {\Large Gestor Táctico de Pokémon}\\[1.2cm]
+    {\large Informe Final de Proyecto}\\[0.2cm]
+    {\large Asignatura: Estructuras de Datos}\\[3cm]
 
-    {\Huge\bfseries PokeHash: Gestor Táctico de Pokémon}\\[0.4cm]
-    {\large\bfseries Un Sistema Eficiente de Indexación y Análisis de Debilidades}\\[0.8cm]
-    {\large Informe Final de Proyecto --- Asignatura: Estructuras de Datos}\\[2.5cm]
-
-    \begin{flushright}
-        \textbf{Integrantes:}\\[0.1cm]
+    \begin{flushleft}
+        \textbf{Integrantes:}\\[0.2cm]
         Cristóbal Sazo\\
         Sebastián Riveros\\
         Simón Guzmán\\
-        Bruno Orellana\\[0.6cm]
+        Bruno Orellana\\[0.8cm]
         \textbf{Profesor:}\\
-        Ignacio Araya\\[0.6cm]
+        Ignacio Araya\\[0.8cm]
         \textbf{Fecha:}\\
         \today
-    \end{flushright}
+    \end{flushleft}
 
     \vfill
     {\small Valparaíso, Chile}
@@ -95,51 +101,561 @@
 
 \newpage
 \pagenumbering{roman}
-
-% ==================== ÍNDICE ====================
 \tableofcontents
 \newpage
-
 \pagenumbering{arabic}
-\setstretch{1.25}
 
-% ==================== SECCIÓN 1: INTRODUCCIÓN ====================
+% =====================================================
 \section{Introducción}
+% =====================================================
 
 \subsection{Contextualización y Propósito}
-El universo Pokémon se caracteriza por una compleja red de interacciones estratégicas entre tipos elementales, estadísticas de combate y sinergias grupales. Con el auge del formato competitivo formal (como el formato VGC oficial de \emph{The Pokémon Company} o la plataforma comunitaria \emph{Smogon}), la planificación táctica se ha convertido en un requisito indispensable para los jugadores. Al construir un equipo de seis integrantes, el usuario debe equilibrar la distribución de estadísticas (puntos de vida, ataque, defensa, velocidad) y, de forma crucial, mitigar las debilidades elementales frente a los 18 tipos elementales existentes.
 
-Actualmente, este proceso de planificación adolece de un vacío práctico: los jugadores se ven obligados a recurrir constantemente a herramientas externas, tales como wikis web, hojas de cálculo o calculadoras en línea. Estas soluciones fragmentan la experiencia de juego, dependen de una conexión a Internet activa y no ofrecen una interfaz unificada que permita indexar masivamente el catálogo completo de criaturas junto con un gestor ágil de composición de equipo.
+El universo Pokémon se caracteriza por una compleja red de interacciones estratégicas entre 18 tipos elementales, estadísticas de combate y sinergias grupales. Con el auge del formato competitivo formal --- VGC oficial de \emph{The Pokémon Company} y la plataforma comunitaria \emph{Smogon} --- la planificación táctica se ha convertido en un requisito indispensable. Al construir un equipo de seis integrantes, el usuario debe equilibrar seis estadísticas base (HP, Ataque, Defensa, Ataque Especial, Defensa Especial, Velocidad) y simultáneamente mitigar vulnerabilidades elementales frente a los 18 tipos existentes.
 
-En respuesta a esta necesidad, surge \textbf{PokeHash}, una aplicación interactiva diseñada para la consola de comandos. Su propósito es consolidar en una única herramienta offline un catálogo completo de Pokémon, con motores de búsqueda extremadamente rápidos y un evaluador táctico que identifique con precisión matemática las vulnerabilidades de la escuadra actual.
+Actualmente, este proceso adolece de un vacío práctico: los jugadores se ven obligados a recurrir a wikis web, hojas de cálculo o calculadoras externas. Estas soluciones fragmentan la experiencia, dependen de conexión a Internet y no ofrecen una interfaz unificada para el análisis táctico. En respuesta a esta necesidad surge \textbf{PokeHash}, una aplicación de consola \emph{offline} que unifica en una sola herramienta un catálogo completo de Pokémon con motores de búsqueda de tiempo constante y un gestor táctico de equipo.
 
 \subsection{Visión General}
-PokeHash es un gestor táctico que procesa y organiza una base de datos local de Pokémon. Su diseño está orientado a la máxima eficiencia temporal mediante el uso de Estructuras de Datos personalizadas.
 
-Las principales capacidades y funcionalidades que componen el sistema son:
+PokeHash procesa y organiza una base de datos de más de 1.100 Pokémon, incluyendo formas regionales y variedades. Sus principales funcionalidades son:
+
 \begin{itemize}
-    \item \textbf{Carga Masiva de Datos:} Inicialización automatizada del catálogo mediante la lectura del archivo estructurado \texttt{Pokemon.csv} y la matriz de relaciones de tipo elemental contenida en \texttt{Tabla.csv}.
-    \item \textbf{Exploración Eficiente de la Pokédex:} Búsquedas instantáneas parametrizadas por dos vías de indexación paralela: a través del nombre exacto de la criatura o mediante su identificador numérico oficial.
-    \item \textbf{Filtrado Avanzado por Categorías:} Búsqueda con filtros compuestos que seleccionan Pokémon en base a su generación de origen (1-9) y a su tipo elemental predominante o secundario.
-    \item \textbf{Análisis de los Mejores Ejemplares (Top 10):} Generación de clasificaciones competitivas de los mejores 10 Pokémon basándose en una o la combinación sumada de dos estadísticas base distintas, aplicando filtros opcionales de tipo o generación.
-    \item \textbf{Gestión de Equipo con Deshacer Táctico:} Construcción dinámica de un equipo con un límite de hasta 6 integrantes, integrando una mecánica de reversión de acción (Undo/Deshacer) para eliminar de forma inmediata al último integrante incorporado en caso de error de selección.
-    \item \textbf{Evaluación de Vulnerabilidades:} Análisis en tiempo real de la composición elemental del equipo, determinando el balance defensivo mediante el cruce de multiplicadores de daño.
-    \item \textbf{Exportación de Estrategia:} Guardado del equipo estructurado junto con su reporte analítico de debilidades directamente en un archivo de texto plano local.
+    \item \textbf{Carga Masiva de Datos:} Inicialización desde \texttt{Pokemon.csv} ($\sim$1.100 registros) y la matriz de efectividades \texttt{Tabla.csv} (18$\times$18 entradas).
+    \item \textbf{Búsqueda Instantánea por Nombre:} Consulta de ficha técnica en tiempo $O(1)$ promedio mediante Tabla Hash, con insensibilidad a mayúsculas.
+    \item \textbf{Búsqueda Instantánea por ID:} Consulta por número de Pokédex en tiempo $O(1)$ promedio mediante un segundo Mapa Hash dedicado.
+    \item \textbf{Filtrado por Generación y Tipo:} Listado de Pokémon que cumplan simultáneamente dos criterios: generación de origen (1--9) y tipo elemental.
+    \item \textbf{Ranking Top 10:} Clasificación de los mejores 10 Pokémon por una o dos estadísticas base, con filtros opcionales de generación o tipo.
+    \item \textbf{Gestión de Equipo con Deshacer:} Pila de hasta 6 integrantes con operación Undo en $O(1)$ exacto.
 \end{itemize}
 
-\paragraph{Alcance y Limitaciones:}
-PokeHash destaca por su velocidad de consulta $O(1)$ en memoria y su nulo consumo de red, permitiendo flujos de análisis fluidos y ágiles en entornos de consola. Sin embargo, no está diseñado para:
-\begin{enumerate}
-    \item Simular batallas en tiempo real o calcular daño dinámico de movimientos (ataques específicos).
-    \item Gestionar más de un equipo simultáneo en memoria de forma persistente sin exportar a un archivo.
-    \item Ofrecer interfaces gráficas multimedia pesadas de forma nativa en su núcleo de C, priorizando la legibilidad, la robustez de los punteros y el rendimiento matemático puro.
-\end{enumerate}
+\paragraph{Limitaciones:} La aplicación no simula batallas en tiempo real, no gestiona múltiples equipos en memoria de forma persistente, y no incluye interfaz gráfica nativa en su núcleo C.
 
 \subsection{Generación de Interés e Innovación}
-La principal innovación de PokeHash radica en su arquitectura interna de datos. A diferencia de las bases de datos relacionales convencionales o las búsquedas lineales de orden $O(n)$ en arreglos que típicamente ralentizan las aplicaciones de consola en C, PokeHash implementa un esquema de **indexación dual** por medio de dos Tablas Hash personalizadas que operan en paralelo (\texttt{pokedex} y \texttt{pokedex\_by\_id}). Esto garantiza que tanto las búsquedas alfabéticas por nombre como las búsquedas numéricas por ID de Pokédex se realicen en tiempo constante $O(1)$ en promedio.
 
-Adicionalmente, el cruce relacional del daño se modela como un Grafo Dirigido representado de manera estática a través de una Matriz de Adyacencia de $18\times18$. Esta elección de diseño permite realizar consultas de efectividad elemental de forma inmediata en tiempo $O(1)$, maximizando el rendimiento al evaluar las debilidades del equipo completo.
+La innovación principal de PokeHash es su arquitectura de \textbf{indexación dual}: dos Tablas Hash personalizadas (\texttt{pokedex} por nombre y \texttt{pokedex\_by\_id} por ID) que garantizan acceso en tiempo $O(1)$ promedio para ambos tipos de búsqueda. El sistema de tipos elementales se modela como un \textbf{Grafo Dirigido Ponderado} implementado como Matriz de Adyacencia estática de $18\times18$, con consultas de efectividad en $O(1)$. La combinación de estos TDAs con una Pila estática para la gestión táctica convierte a PokeHash en una solución de alto rendimiento computacional construida íntegramente en C, sin librerías externas.
 
-La integración coordinada de la Tabla Hash para el catálogo, la estructura de Pila LIFO (Last-In, First-Out) para la lógica de selección de equipo con deshacer, y la matriz de adyacencia para las debilidades elementales, convierte a PokeHash en una solución de ingeniería robusta, de alta velocidad computacional y de gran interés para el aprendizaje práctico de la gestión de memoria dinámica en el lenguaje C.
+% =====================================================
+\section{Descripción de la Aplicación e Interacción}
+% =====================================================
+
+\subsection{Mapa de Navegación}
+
+La aplicación se organiza en un menú principal con dos submenús funcionales:
+
+\begin{itemize}[leftmargin=1.5cm]
+    \item \textbf{Menú Principal}
+    \begin{itemize}
+        \item \textbf{1. Explorar Pokédex}
+        \begin{itemize}
+            \item 1. Buscar por Nombre
+            \item 2. Buscar por Número de Pokédex
+            \item 3. Buscar con Filtro (Generación y Tipo)
+            \item 4. Mejores 10 por Estadística
+            \item 5. Volver al Menú Principal
+        \end{itemize}
+        \item \textbf{2. Gestión Estratégica de Equipo}
+        \begin{itemize}
+            \item 1. Agregar Pokémon al Equipo
+            \item 2. Ver Equipo Actual
+            \item 3. Deshacer Última Adición
+            \item 4. Volver al Menú Principal
+        \end{itemize}
+        \item \textbf{3. Exportar Equipo a Archivo}
+        \item \textbf{4. Salir}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Flujo de Interacción Detallado}
+
+\subsubsection{Buscar por Nombre}
+
+\textbf{Escenario ideal:}
+\begin{enumerate}
+    \item El usuario selecciona la opción \texttt{1} (Explorar Pokédex) y luego \texttt{1} (Buscar por Nombre).
+    \item El sistema imprime: \texttt{"Ingrese el nombre del Pokémon a buscar:"}.
+    \item El usuario ingresa \texttt{"Charizard"} (la búsqueda ignora mayúsculas, por lo que \texttt{"charizard"} también funciona).
+    \item El sistema ejecuta la búsqueda en la Tabla Hash y muestra la ficha técnica completa: nombre, ID, Tipo 1, Tipo 2, HP, Ataque, Defensa, Ataque Especial, Defensa Especial, Velocidad, Total de Estadísticas y Generación.
+    \item El sistema pausa con \texttt{"Presione ENTER para continuar..."} y devuelve el control al submenú.
+\end{enumerate}
+
+\textbf{Escenarios de error:}
+\begin{itemize}
+    \item Pokémon no encontrado: \texttt{"[!] Pokémon ''X'' no encontrado en la Pokédex."}.
+    \item Entrada en blanco o solo espacios: \texttt{"[Error] Nombre inválido."}.
+\end{itemize}
+
+\subsubsection{Buscar por Número de Pokédex}
+
+\textbf{Escenario ideal:}
+\begin{enumerate}
+    \item El usuario ingresa \texttt{25}.
+    \item El sistema convierte el entero a cadena (\texttt{"25"}) y ejecuta la búsqueda en el mapa secundario \texttt{pokedex\_by\_id}, mostrando la ficha de Pikachu.
+\end{enumerate}
+
+\textbf{Escenarios de error:}
+\begin{itemize}
+    \item ID inexistente: \texttt{"[!] Pokémon con número X no encontrado en la Pokédex."}.
+    \item Carácter no numérico: \texttt{"[Error] Entrada no válida."} y limpieza del buffer de entrada con un bucle \texttt{while((c = getchar()) != '\textbackslash{}n')}.
+\end{itemize}
+
+\subsubsection{Buscar con Filtro por Generación y Tipo}
+
+\textbf{Escenario ideal:}
+\begin{enumerate}
+    \item El sistema solicita la generación. El usuario ingresa \texttt{1}.
+    \item El sistema solicita el tipo. El usuario ingresa \texttt{Fire}.
+    \item El sistema itera el mapa completo y muestra una tabla con ID, Nombre, Tipo 1, Tipo 2 y BST de todos los Pokémon de Generación 1 que posean el tipo \texttt{Fire} en cualquiera de sus dos slots de tipo.
+    \item Al final se imprime el total de coincidencias.
+\end{enumerate}
+
+\textbf{Escenarios de error:}
+\begin{itemize}
+    \item Sin coincidencias: se imprime \texttt{"Total: 0 Pokémon encontrados."}.
+    \item Tipo en blanco: \texttt{"[Error] Tipo inválido."}.
+\end{itemize}
+
+\subsubsection{Agregar Pokémon al Equipo y Deshacer}
+
+\textbf{Escenario ideal:}
+\begin{enumerate}
+    \item El usuario selecciona opción \texttt{2} $\rightarrow$ \texttt{1} (Agregar). Ingresa \texttt{"Charizard"}.
+    \item El sistema busca en la Tabla Hash. Tras encontrarlo, confirma: \texttt{"[!] ¡Charizard ha sido añadido exitosamente! (Espacios ocupados: 1/6)"}.
+    \item El usuario decide revertir y selecciona opción \texttt{2} $\rightarrow$ \texttt{3} (Deshacer).
+    \item El sistema responde: \texttt{"[!] Última acción revertida. El equipo vuelve a tener 0 integrante(s)."}.
+\end{enumerate}
+
+\textbf{Escenarios de error:}
+\begin{itemize}
+    \item Equipo lleno (tope = 6): \texttt{"[Error] El equipo está completo (máximo 6 Pokémon)."}.
+    \item Deshacer con equipo vacío: \texttt{"[!] El equipo ya está vacío. No hay nada que deshacer."}.
+    \item Pokémon no encontrado: \texttt{"[!] Pokémon ''X'' no encontrado en la Pokédex."}.
+\end{itemize}
+
+% =====================================================
+\section{Arquitectura de Datos y Estructuras}
+% =====================================================
+
+\subsection{Modelamiento de Entidades}
+
+\subsubsection{Entidad \texttt{Pokemon}}
+
+La entidad fundamental del sistema modela a cada criatura del catálogo. Está definida en \texttt{pokehash.h}:
+
+\begin{lstlisting}[caption={Definición del \texttt{struct Pokemon} en \texttt{pokehash.h}}]
+typedef struct {
+    int id;           // Numero de Pokedex (identificador numerico unico por especie)
+    char nombre[100]; // Nombre unico (incluye forma regional si aplica)
+    char tipo1[20];   // Tipo elemental primario (siempre presente)
+    char tipo2[20];   // Tipo elemental secundario (cadena vacia si es monotipo)
+    int total_stats;  // BST: suma de las seis estadisticas base
+    int hp;           // Puntos de vida base
+    int ataque;       // Ataque fisico base
+    int defensa;      // Defensa fisica base
+    int ataque_esp;   // Ataque especial base
+    int defensa_esp;  // Defensa especial base
+    int velocidad;    // Velocidad base
+    int gen;          // Generacion de origen (1 a 9)
+} Pokemon;
+\end{lstlisting}
+
+El campo \texttt{nombre} puede contener el nombre base (\texttt{"Pikachu"}) o un nombre compuesto que integra la forma regional. La lógica de generación de nombres únicos en \texttt{cargar\_data()} aplica tres reglas: (1) si el campo \emph{Form} está vacío, se usa el nombre base; (2) si \emph{Form} ya incluye el nombre base (ej: \texttt{"Mega Venusaur"}), se usa directamente; (3) si no, se construye el formato \texttt{"Nombre (Forma)"} (ej: \texttt{"Meowstic (Male)"}). Esto garantiza la unicidad de clave en la Tabla Hash.
+
+\subsubsection{Entidad \texttt{Equipo}}
+
+La entidad gestora del equipo almacena hasta 6 punteros a estructuras \texttt{Pokemon}:
+
+\begin{lstlisting}[caption={Definición del \texttt{struct Equipo} en \texttt{pokehash.h}}]
+typedef struct {
+    Pokemon* integrantes[6]; // Arreglo estatico de 6 punteros a Pokemon
+    int tope;                // Indice del proximo slot libre (0 = vacio, 6 = lleno)
+} Equipo;
+\end{lstlisting}
+
+El campo \texttt{tope} actúa como el índice de cima de una Pila: al agregar, se asigna \texttt{integrantes[tope] = p} y se incrementa \texttt{tope}; al deshacer, solo se decrementa \texttt{tope}. Cuando \texttt{tope == 0} el equipo está vacío; cuando \texttt{tope == 6} está completo.
+
+\subsubsection{Enumeración \texttt{PokemonType}}
+
+Para indexar la Matriz de Adyacencia del grafo de tipos, se define una enumeración que mapea cada tipo a un entero de 0 a 17:
+
+\begin{lstlisting}[caption={Enumeración \texttt{PokemonType} en \texttt{pokehash.h}}]
+typedef enum {
+    NORMAL=0, FIRE, WATER, ELECTRIC, GRASS, ICE, FIGHTING, POISON,
+    GROUND, FLYING, PSYCHIC, BUG, ROCK, GHOST, DRAGON,
+    DARK, STEEL, FAIRY   // 18 tipos, valores 0 a 17
+} PokemonType;
+
+#define NUM_TIPOS 18
+\end{lstlisting}
+
+\subsection{Instancias y Selección de TDAs}
+
+El sistema declara cuatro instancias de TDAs que operan de forma coordinada:
+
+\paragraph{TDA Mapa --- Instancia 1: \emph{Pokédex por Nombre} (\texttt{pokedex})}
+Se utiliza un TDA Mapa instanciado como \textbf{Pokédex por Nombre}, que indexa el catálogo completo usando como clave el campo \texttt{nombre} del Pokémon (tipo \texttt{char*}) y como valor un puntero a la entidad \texttt{Pokemon*}. \textbf{Justificación:} La búsqueda por nombre es la operación de consulta más frecuente. Un Mapa asocia la clave al valor en tiempo constante $O(1)$ promedio, eliminando la necesidad de recorrer secuencialmente los más de 1.100 registros.
+
+\paragraph{TDA Mapa --- Instancia 2: \emph{Pokédex por ID} (\texttt{pokedex\_by\_id})}
+Se utiliza un segundo TDA Mapa instanciado como \textbf{Pokédex por ID}, que indexa el mismo catálogo usando como clave el ID numérico del Pokémon representado como cadena de texto (ej: \texttt{"25"} para Pikachu) y como valor el mismo puntero \texttt{Pokemon*} de la instancia anterior. \textbf{Justificación:} Sin este índice secundario, una búsqueda por número de Pokédex requeriría iterar todos los pares del mapa primario en $O(N)$. La indexación dual garantiza $O(1)$ promedio para búsquedas numéricas al costo de $O(N)$ de espacio adicional para las claves de texto del segundo mapa.
+
+\paragraph{TDA Pila --- Instancia: \emph{Equipo Activo} (\texttt{Equipo})}
+Se utiliza un TDA Pila instanciado como \textbf{Equipo Activo}, que gestiona los Pokémon seleccionados en orden de inserción LIFO (Last-In, First-Out). Las operaciones de \emph{push} (agregar) y \emph{pop} (deshacer) son en $O(1)$. \textbf{Justificación:} La semántica LIFO es exactamente la que modela la funcionalidad de Deshacer: el último Pokémon en ser agregado es el primero en ser removido ante un error del usuario.
+
+\paragraph{TDA Grafo Dirigido Ponderado --- Instancia: \emph{Red de Efectividades} (\texttt{matrizDebilidades})}
+Se utiliza un TDA Grafo Dirigido Ponderado instanciado como \textbf{Red de Efectividades de Tipos}. Cada nodo representa uno de los 18 tipos elementales y cada arista dirigida tiene como peso el multiplicador de daño (0.0 = inmune, 0.5 = resistente, 1.0 = neutral, 2.0 = débil). \textbf{Justificación:} Las relaciones de efectividad son asimétricas y ponderadas (Fuego es efectivo contra Planta, pero Planta no lo es contra Fuego), lo que es la definición exacta de un Grafo Dirigido Ponderado. La consulta de efectividad entre cualquier par de tipos es directa e inmediata.
+
+\subsection{Estructuras de Datos Físicas}
+
+\subsubsection{Mapas: Tabla Hash con Encadenamiento Separado}
+
+Ambos mapas (\texttt{pokedex} y \texttt{pokedex\_by\_id}) se implementan físicamente como una \textbf{Tabla Hash con Encadenamiento Separado} (\emph{Separate Chaining}). El núcleo de la estructura, definido en \texttt{tdas/map.c}, es:
+
+\begin{lstlisting}[caption={Estructura interna de la Tabla Hash en \texttt{tdas/map.c}}]
+#define BUCKETS_LIMIT 200
+
+struct Map {
+    List *buckets[BUCKETS_LIMIT]; // Arreglo estatico de 200 listas enlazadas simples
+    int size;                     // Numero total de pares almacenados
+    int (*is_equal)(void*, void*);// Funcion de comparacion de claves inyectada
+    int current_bucket;           // Bucket activo durante la iteracion
+};
+\end{lstlisting}
+
+La función de dispersión implementada es \textbf{DJB2} (Dan Bernstein Hash 2). Para lograr búsquedas insensibles a mayúsculas, cada carácter se normaliza a minúsculas antes de incorporarse al hash:
+
+\begin{lstlisting}[caption={Función de hash DJB2 con normalización a minúsculas en \texttt{tdas/map.c}}]
+static unsigned long hash_string(void *key) {
+    char *str = (char *)key;
+    unsigned long hash = 5381;
+    int c;
+    while ((c = (unsigned char)*str++))
+        hash = ((hash << 5) + hash) + tolower(c); /* hash * 33 + tolower(c) */
+    return hash;
+}
+\end{lstlisting}
+
+El índice del bucket se calcula como $\text{bucket} = \text{hash\_string}(\text{clave}) \bmod 200$. Cada bucket es una \textbf{Lista Enlazada Simple} (\texttt{tdas/list.c}) que almacena pares \texttt{MapPair\{key, value\}} para resolver colisiones. La comparación de claves dentro del bucket usa \texttt{strcasecmp} (inyectada en la creación del mapa como \texttt{string\_is\_equal}), garantizando que \texttt{"Pikachu"}, \texttt{"pikachu"} y \texttt{"PIKACHU"} se traten como la misma clave.
+
+\textbf{Justificación física:} Con 200 buckets y $\sim$1.100 Pokémon, el factor de carga $\alpha \approx 5.5$. En el caso promedio, la búsqueda requiere $O(1)$ saltos de hashing más $O(\alpha)$ comparaciones de cadena, que para $\alpha$ constante es $O(1)$. La Lista Enlazada Simple en cada bucket añade un overhead mínimo de memoria ($O(N)$ nodos totales) sin sacrificar la complejidad de acceso.
+
+\subsubsection{Pila del Equipo: Arreglo Estático de Punteros}
+
+La Pila del equipo se implementa físicamente como un \textbf{arreglo estático de 6 punteros} con un entero índice \texttt{tope}. Las operaciones físicas son:
+
+\begin{itemize}
+    \item \textbf{push} (agregar): \texttt{integrantes[tope] = p; tope++;} \quad $\Rightarrow O(1)$ exacto.
+    \item \textbf{pop} (deshacer): \texttt{tope-{}-;} \quad $\Rightarrow O(1)$ exacto. El puntero anterior en \texttt{integrantes[tope]} no se destruye; simplemente queda fuera del alcance lógico de la pila.
+    \item \textbf{top} (ver cima): \texttt{integrantes[tope-1];} \quad $\Rightarrow O(1)$ exacto.
+\end{itemize}
+
+\textbf{Justificación física:} El tamaño máximo del equipo es \textbf{exactamente 6}, por regla inamovible del juego. Usar memoria dinámica (\texttt{malloc}/\texttt{realloc}) añadiría overhead de gestión de heap sin ningún beneficio funcional. El arreglo estático de 6 posiciones es la estructura más eficiente posible: cero overhead de punteros extras, acceso en un único ciclo de reloj.
+
+\subsubsection{Grafo de Tipos: Matriz de Adyacencia Estática}
+
+El Grafo de Efectividades se implementa físicamente como una \textbf{Matriz de Adyacencia Estática} de tipo \texttt{float[18][18]}, declarada en \texttt{pokehash.c}:
+
+\begin{lstlisting}[caption={Declaración de la Matriz de Adyacencia en \texttt{pokehash.c}}]
+float matrizDebilidades[NUM_TIPOS][NUM_TIPOS]; /* Matriz 18x18 = 324 celdas float */
+\end{lstlisting}
+
+Cada celda \texttt{matrizDebilidades[i][j]} almacena el multiplicador de daño cuando un ataque de tipo $i$ impacta a un Pokémon de tipo $j$. La matriz es cargada en tiempo de inicio desde \texttt{Tabla.csv} mediante \texttt{cargar\_matriz\_debilidades()}, que la puebla fila por fila usando \texttt{strtok} y \texttt{atof}.
+
+\textbf{Justificación física:} La consulta de efectividad entre dos tipos es un acceso directo por índice doble (\texttt{matrizDebilidades[i][j]}) en $O(1)$ absoluto, sin recorridos. Una Lista de Adyacencia requeriría recorrer la lista de aristas del nodo $i$ para encontrar el nodo $j$, con costo $O(T)$ donde $T=18$ en un grafo completo. La Matriz de Adyacencia es la estructura física óptima para grafos densos con consultas frecuentes de aristas individuales.
+
+% =====================================================
+\section{Diseño de la Solución Algorítmica}
+% =====================================================
+
+En esta sección se describe la lógica de cada funcionalidad usando exclusivamente las operaciones formales de los TDAs, sin mencionar punteros ni índices internos.
+
+\subsection{Lógica Operacional por Funcionalidad}
+
+\subsubsection{Cargar Catálogo (\texttt{cargar\_data})}
+
+\begin{enumerate}
+    \item Se inicializan las instancias \textbf{Pokédex por Nombre} y \textbf{Pokédex por ID} con la operación \texttt{crear(comparador)}.
+    \item Se abre el archivo \texttt{Pokemon.csv} y se descarta la primera línea (cabecera).
+    \item Por cada registro del archivo:
+    \begin{enumerate}
+        \item Se crea una nueva entidad \texttt{Pokemon} con sus campos parseados.
+        \item Se genera el nombre único aplicando las reglas de composición de forma regional.
+        \item Se aplica \texttt{insertar(nombre, Pokemon)} sobre la \textbf{Pokédex por Nombre}.
+        \item Se convierte el ID entero a cadena de texto y se aplica \texttt{insertar(id\_texto, Pokemon)} sobre la \textbf{Pokédex por ID}.
+    \end{enumerate}
+    \item Se repite hasta leer todos los registros. La operación \texttt{insertar} ignora automáticamente los duplicados, por lo que Pokémon con formas regionales que comparten ID solo quedan indexados por el nombre de su primera aparición en el segundo mapa.
+\end{enumerate}
+
+\subsubsection{Cargar Matriz de Efectividades (\texttt{cargar\_matriz\_debilidades})}
+
+\begin{enumerate}
+    \item Se abre \texttt{Tabla.csv} y se descarta la cabecera (fila de nombres de tipos).
+    \item Por cada una de las 18 filas, se omite la primera columna (nombre del tipo atacante) y se leen los 18 valores numéricos \texttt{float} que representan la efectividad del tipo $i$ contra cada uno de los 18 tipos defensivos $j$.
+    \item Cada valor se almacena en la celda \texttt{matrizDebilidades[i][j]} de la \textbf{Red de Efectividades}.
+\end{enumerate}
+
+\subsubsection{Buscar por Nombre (\texttt{buscar\_por\_nombre})}
+
+\begin{enumerate}
+    \item Se lee la cadena ingresada por el usuario. Se eliminan espacios al inicio y final (\emph{trim}) y el salto de línea residual.
+    \item Se aplica la operación \texttt{buscar(nombre)} sobre la \textbf{Pokédex por Nombre}.
+    \item Si la operación retorna un resultado válido, se despliega la ficha técnica completa del Pokémon. En caso contrario, se notifica al usuario que no fue encontrado.
+\end{enumerate}
+
+\subsubsection{Buscar por Número de Pokédex (\texttt{buscar\_por\_id})}
+
+\begin{enumerate}
+    \item Se lee el entero ingresado por el usuario con validación de formato.
+    \item Se convierte el entero a su representación textual (ej: \texttt{25} $\rightarrow$ \texttt{"25"}).
+    \item Se aplica la operación \texttt{buscar(id\_texto)} sobre la \textbf{Pokédex por ID}.
+    \item Se muestra la ficha técnica o el mensaje de error según el resultado.
+\end{enumerate}
+
+\subsubsection{Buscar con Filtro por Generación y Tipo (\texttt{buscar\_por\_filtro\_gen\_tipo})}
+
+\begin{enumerate}
+    \item Se leen la generación (entero) y el tipo elemental (cadena) ingresados por el usuario.
+    \item Se inicia la iteración sobre la \textbf{Pokédex por Nombre} con la operación \texttt{primero()}.
+    \item Por cada \texttt{Pokemon} obtenido con \texttt{siguiente()}:
+    \begin{enumerate}
+        \item Se verifica si \texttt{Pokemon.gen} coincide con la generación buscada.
+        \item Se verifica si \texttt{Pokemon.tipo1} o \texttt{Pokemon.tipo2} coincide con el tipo buscado (insensible a mayúsculas).
+        \item Si ambas condiciones se cumplen, se imprime la fila del Pokémon.
+    \end{enumerate}
+    \item Al terminar la iteración, se imprime el total de coincidencias.
+\end{enumerate}
+
+\subsection{Algoritmo Core: Ranking Top 10 (\texttt{mejores10PorStat})}
+
+Este es el algoritmo de mayor complejidad lógica del sistema. Combina el recorrido del mapa con el mantenimiento de un \textbf{ranking de top-$K$ en tiempo lineal}:
+
+\begin{enumerate}
+    \item El usuario especifica el modo (1 stat o suma de 2 stats) y un filtro opcional (toda la Pokédex, por generación, o por tipo).
+    \item Se inicializa un \textbf{Arreglo Estático Ordenado Descendentemente de $K=10$ posiciones}, con puntajes iniciales de $-1$.
+    \item Se inicia la iteración sobre la \textbf{Pokédex por Nombre}:
+    \begin{enumerate}
+        \item Si el Pokémon no cumple el filtro activo, se avanza sin procesarlo.
+        \item Se calcula el puntaje del Pokémon (stat seleccionada, o suma de dos stats).
+        \item \textbf{Si el puntaje es mayor que el décimo lugar del arreglo:} se busca la posición correcta de inserción recorriendo el arreglo de manera descendente, se desplazan los elementos hacia abajo y se inserta el nuevo Pokémon. Este proceso toma $O(K) = O(10) = O(1)$ por ser $K$ constante.
+    \end{enumerate}
+    \item Tras recorrer los $N$ Pokémon del catálogo, el arreglo contiene el Top-10 ordenado, que se imprime.
+\end{enumerate}
+
+\textbf{Por qué no se usa el TDA Heap:} El TDA Heap disponible (\texttt{tdas/heap.h}) implementa un \emph{max-heap}. Usarlo para resolver un problema Top-$K$ requeriría insertar los $N$ Pokémon y luego extraer los 10 mejores, con costo $O(N \log N)$. El algoritmo de ventana estática con $K=10$ tiene costo $O(N \cdot K) = O(N)$ al ser $K$ constante, lo que lo hace \textbf{asintóticamente superior} para este problema.
+
+% =====================================================
+\section{Análisis de Complejidad}
+% =====================================================
+
+\subsection{Tabla de Complejidad Temporal y Espacial}
+
+En la siguiente tabla se presenta el análisis de peor caso (\emph{Worst-Case}) de todas las funciones del sistema. $N$ es el número total de Pokémon ($\sim$1.100), $k$ el número de integrantes del equipo ($0 \leq k \leq 6$), $\alpha$ el factor de carga del hash ($\approx 5.5$) y $T = 18$ el número de tipos elementales.
+
+\begin{table}[H]
+\centering
+\caption{Complejidad de las funciones de PokeHash}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}lXXX@{}}
+\toprule
+\textbf{Función} & \textbf{Caso Promedio} & \textbf{Peor Caso} & \textbf{Esp. Adicional} \\
+\midrule
+\texttt{cargar\_data()} & $O(N)$ & $O(N)$ & $O(N)$ \\
+\texttt{cargar\_matriz\_debilidades()} & $O(T^2) = O(1)$ & $O(1)$ & $O(1)$ \\
+\texttt{buscar\_por\_nombre()} & $O(1)$ & $O(N)^{*}$ & $O(1)$ \\
+\texttt{buscar\_por\_id()} & $O(1)$ & $O(N)^{*}$ & $O(1)$ \\
+\texttt{buscar\_por\_filtro\_gen\_tipo()} & $O(N)$ & $O(N)$ & $O(1)$ \\
+\texttt{mejores10PorStat()} & $O(N)$ & $O(N)$ & $O(1)$ \\
+\texttt{agregar\_pokemon\_equipo()} & $O(1)$ & $O(N)^{*}$ & $O(1)$ \\
+\texttt{deshacer()} & $O(1)$ & $O(1)$ & $O(1)$ \\
+\texttt{ver\_equipo\_actual()} & $O(k) = O(1)$ & $O(1)$ & $O(1)$ \\
+\texttt{liberar\_pokedex()} & $O(N)$ & $O(N)$ & $O(1)$ \\
+\bottomrule
+\multicolumn{4}{l}{\small $^{*}$ El peor caso teórico $O(N)$ ocurre solo si la función hash genera colisión total (todos los N}\\
+\multicolumn{4}{l}{\small \phantom{$^{*}$} elementos en el mismo bucket). En la práctica con DJB2 y 200 buckets esto es extremadamente improbable.}
+\end{tabularx}
+\end{table}
+
+\subsection{Justificación de Bajo Nivel}
+
+\subsubsection{\texttt{buscar\_por\_nombre()} y \texttt{buscar\_por\_id()}: $O(1)$ promedio}
+
+El proceso interno de \texttt{map\_search} ejecuta exactamente los siguientes pasos:
+\begin{enumerate}
+    \item \textbf{Hashing:} Se ejecuta DJB2 sobre la clave, iterando carácter a carácter. La longitud máxima de una clave es 100 caracteres (nombre) o 4 caracteres (ID), ambos constantes $\Rightarrow O(1)$.
+    \item \textbf{Indexación:} Se calcula \texttt{bucket = hash \% 200}, una operación de módulo $\Rightarrow O(1)$.
+    \item \textbf{Acceso al bucket:} Acceso directo a \texttt{buckets[bucket]}, indexación de arreglo $\Rightarrow O(1)$.
+    \item \textbf{Recorrido de la cadena:} Se recorre la Lista Enlazada del bucket comparando claves con \texttt{strcasecmp}. Con factor de carga $\alpha \approx 5.5$, se realizan en promedio $O(\alpha) \approx O(6)$ comparaciones $\Rightarrow O(1)$ constante. En el peor caso teórico (colisión total), se recorren los $N$ elementos de la cadena $\Rightarrow O(N)$.
+\end{enumerate}
+
+\subsubsection{\texttt{buscar\_por\_filtro\_gen\_tipo()}: $O(N)$ inherente e irreducible}
+
+Esta función usa \texttt{map\_first()} y \texttt{map\_next()} para iterar todos los pares del mapa. Internamente, \texttt{map\_next()} avanza en la lista del bucket actual ($O(1)$) o busca el siguiente bucket no vacío en el arreglo de 200 buckets ($O(200/N) \approx O(1)$). El costo dominante es recorrer los $N$ pares: $O(N)$.
+
+Esta complejidad es \textbf{inherente al diseño}: la Tabla Hash está indexada solo por nombre. Para filtrar por tipo y generación simultáneamente no existe un atajo posible sin un índice adicional (por ejemplo, un tercer mapa indexado por tipo). Con las estructuras actuales, $O(N)$ es la cota inferior para esta operación.
+
+\subsubsection{\texttt{mejores10PorStat()}: $O(N)$ con ventana de inserción constante}
+
+El algoritmo mantiene un arreglo ordenado de $K=10$ posiciones. Por cada uno de los $N$ Pokémon del catálogo:
+\begin{itemize}
+    \item Se compara su puntaje con el décimo lugar: $O(1)$.
+    \item Si supera el mínimo (caso frecuente para los primeros elementos, cada vez más raro a medida que el top-10 se consolida): búsqueda lineal en el arreglo de $K=10$ posiciones más desplazamiento: $O(K) = O(10) = O(1)$.
+\end{itemize}
+Total: $N$ iteraciones de $O(1) = O(N)$. La complejidad espacial es $O(1)$ ya que el arreglo de 10 posiciones es estático y no escala con $N$.
+
+\subsubsection{\texttt{deshacer()}: $O(1)$ estricto}
+
+La operación de deshacer ejecuta exactamente una instrucción de decremento aritmético sobre el entero \texttt{tope}. No accede a memoria dinámica, no recorre ninguna estructura, no llama a \texttt{free()}. La complejidad es $O(1)$ exacto en todos los casos posibles.
+
+\subsubsection{\texttt{liberar\_pokedex()}: $O(N)$ con doble responsabilidad de propiedad}
+
+La liberación requiere $O(N)$ por la doble responsabilidad de propiedad de memoria:
+\begin{enumerate}
+    \item \textbf{Primera iteración} sobre la \textbf{Pokédex por Nombre}: se libera cada objeto \texttt{Pokemon*} ($N$ operaciones \texttt{free}) y se destruye el mapa (libera 200 buckets y el struct \texttt{Map}): $O(N) + O(1)$.
+    \item \textbf{Segunda iteración} sobre la \textbf{Pokédex por ID}: se libera cada clave dinámica \texttt{id\_key} ($N$ operaciones \texttt{free}). Los valores \texttt{Pokemon*} \textbf{no} se liberan aquí (ya fueron liberados en el paso anterior): $O(N) + O(1)$.
+\end{enumerate}
+Total: $O(N)$. Este orden es \textbf{obligatorio}: liberar los \texttt{Pokemon*} desde el segundo mapa también causaría un error de doble liberación (\emph{double-free}).
+
+% =====================================================
+\section{Aspecto Desafiante}
+% =====================================================
+
+El desarrollo de PokeHash presentó tres desafíos técnicos de alto nivel en C:
+
+\subsection{Gestión Manual de Memoria Dinámica con Doble Modelo de Propiedad}
+
+En C no existe recolector de basura. Cada una de las $\sim$1.100 entidades \texttt{Pokemon} se asigna individualmente con \texttt{malloc} durante la carga:
+
+\begin{lstlisting}[caption={Asignación dinámica por Pokémon en \texttt{cargar\_data()}}]
+Pokemon *pmon = (Pokemon *)malloc(sizeof(Pokemon));
+/* ...se rellenan los campos del struct... */
+map_insert(pokedex, pmon->nombre, pmon);
+\end{lstlisting}
+
+Adicionalmente, para el segundo mapa se asigna una clave de texto dinámica por cada Pokémon:
+
+\begin{lstlisting}[caption={Asignación dinámica de clave ID para el segundo mapa}]
+char *id_key = (char *)malloc(20 * sizeof(char));
+snprintf(id_key, 20, "%d", pmon->id);
+map_insert(pokedex_by_id, id_key, pmon); /* La clave es dinamica; el valor no */
+\end{lstlisting}
+
+El desafío reside en que ambos mapas comparten los mismos \texttt{Pokemon*}, pero con \textbf{modelos de propiedad asimétricos}: el primer mapa es propietario de los objetos \texttt{Pokemon} (debe liberarlos con \texttt{free}), mientras que el segundo mapa es propietario únicamente de sus claves \texttt{id\_key} (debe liberar esas cadenas, pero \textbf{no} los valores \texttt{Pokemon*}, que ya fueron liberados). Una confusión en este orden produce doble liberación (\emph{double-free}) o fugas de memoria. La función \texttt{liberar\_pokedex()} implementa correctamente esta secuencia:
+
+\begin{lstlisting}[caption={Liberación correcta y ordenada en \texttt{liberar\_pokedex()}}]
+/* 1. Libera objetos Pokemon (propiedad del mapa primario) */
+MapPair *pair = map_first(pokedex);
+while (pair != NULL) {
+    free((Pokemon *)pair->value); /* Solo el valor, NO la clave (nombre del struct) */
+    pair = map_next(pokedex);
+}
+map_destroy(pokedex);   /* Libera nodos de lista, buckets y struct Map */
+
+/* 2. Libera las claves dinamicas de ID (propiedad del mapa secundario) */
+pair = map_first(pokedex_by_id);
+while (pair != NULL) {
+    free((char *)pair->key); /* Solo la clave id_key, NO el valor Pokemon* */
+    pair = map_next(pokedex_by_id);
+}
+map_destroy(pokedex_by_id);
+\end{lstlisting}
+
+\subsection{Diseño de la Función Hash con Insensibilidad a Mayúsculas}
+
+Lograr que \texttt{"charizard"}, \texttt{"Charizard"} y \texttt{"CHARIZARD"} calculen el mismo bucket requirió modificar la función DJB2 para incorporar \texttt{tolower(c)} en cada iteración antes de acumular el hash. Complementariamente, la función de comparación inyectada en el mapa usa \texttt{strcasecmp} en lugar de \texttt{strcmp}:
+
+\begin{lstlisting}[caption={Comparación insensible a mayúsculas en \texttt{pokehash.c}}]
+int string_is_equal(void *key1, void *key2) {
+    if (key1 == NULL || key2 == NULL) return 0;
+    return strcasecmp((char *)key1, (char *)key2) == 0;
+}
+\end{lstlisting}
+
+Esta combinación --- hashing con normalización + comparación insensible --- garantiza que el mismo Pokémon sea encontrado independientemente de cómo el usuario capitalice su nombre.
+
+\subsection{Coordinación Precisa de la Indexación Dual}
+
+Mantener dos Tablas Hash que referencian los mismos objetos en memoria exige una coordinación sin errores:
+\begin{itemize}
+    \item Ambas inserciones deben ocurrir en la misma iteración del ciclo de carga, con el mismo \texttt{Pokemon*}.
+    \item La verificación interna de duplicados de \texttt{map\_insert} garantiza que si la inserción en el primer mapa falla (nombre ya existe), tampoco se inserta en el segundo. Esto es crítico para Pokémon con formas regionales que comparten nombre base.
+    \item Pokémon de la misma especie pero distintas formas (ej: \texttt{"Charizard"} e \texttt{"Mega Charizard X"}) comparten el mismo ID numérico. Esto implica que \texttt{pokedex\_by\_id} solo indexa la \emph{primera} forma encontrada para ese ID, ya que la segunda inserción es rechazada por duplicado. Este comportamiento es determinista y esperado.
+\end{itemize}
+
+% =====================================================
+\section{Planificación y Contribución del Equipo}
+% =====================================================
+
+\subsection{Distribución de Roles y Responsabilidades}
+
+\paragraph{Coordinador de Proyecto --- Cristóbal Sazo}
+Responsable de la arquitectura global del sistema. Definió el diseño de la indexación dual con dos Tablas Hash, supervisó la lógica de gestión de memoria dinámica (modelo de doble propiedad) y resolvió los cuellos de botella de integración entre módulos.
+
+\paragraph{Comunicador --- Sebastián Riveros}
+Responsable de la documentación formal del proyecto. Redactó el Informe de Avance y el Informe Final, documentó los TDAs y sus justificaciones de complejidad, y actuó como enlace oficial con la cátedra para resolver dudas de implementación.
+
+\paragraph{Gestor de Calidad --- Simón Guzmán}
+Responsable de la robustez técnica y la metodología ágil. Supervisó el control de versiones Git, realizó revisiones cruzadas de código para detectar accesos a punteros nulos y fugas de memoria, y validó que el manejo de errores en lectura de CSV y entradas del usuario fuera robusto.
+
+\paragraph{Responsable de Integración --- Bruno Orellana}
+Supervisor final de la arquitectura. Coordinó la unión de los módulos de carga de archivos, estructuras de datos y menús. Lideró las pruebas de estrés (datos erróneos, nombres inexistentes, equipo lleno) y auditó la consistencia de nomenclatura en todo el código fuente.
+
+\subsection{Lista de Tareas Realizadas por Integrante}
+
+\begin{table}[H]
+\centering
+\caption{Distribución de tareas del proyecto PokeHash}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Integrante} & \textbf{Tareas Realizadas} \\
+\midrule
+Cristóbal Sazo &
+Diseño de la arquitectura dual de mapas hash.
+Implementación de \texttt{cargar\_data()} con doble inserción.
+Implementación de \texttt{liberar\_pokedex()} con doble iteración y modelo de propiedad asimétrico.
+Resolución de bugs de gestión de memoria. \\
+\midrule
+Sebastián Riveros &
+Redacción del Informe de Avance e Informe Final.
+Documentación técnica de TDAs, complejidades y estructuras físicas.
+Implementación de la función de comparación insensible a mayúsculas (\texttt{string\_is\_equal} con \texttt{strcasecmp}).
+Generación del \texttt{README.md} del repositorio. \\
+\midrule
+Simón Guzmán &
+Gestión del repositorio Git (ramas, merges y resolución de conflictos).
+Implementación de \texttt{menu\_explorar\_pokedex()} y sus tres subfunciones de búsqueda.
+Validación de entradas del usuario (limpieza de buffer, trim de strings, manejo de EOF).
+Pruebas de integración y manejo de errores. \\
+\midrule
+Bruno Orellana &
+Implementación de \texttt{mejores10PorStat()} con algoritmo de ventana Top-10.
+Implementación de \texttt{cargar\_matriz\_debilidades()} desde \texttt{Tabla.csv}.
+Implementación del módulo de gestión de equipo (\texttt{agregar\_pokemon\_equipo}, \texttt{ver\_equipo\_actual}, \texttt{deshacer}).
+Pruebas de estrés con datos inválidos y casos borde. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Carta Gantt}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{carta_gantt.png}
+    \caption{Carta Gantt --- Planificación del desarrollo de PokeHash (Junio)}
+\end{figure}
+
+% =====================================================
+\section{Conclusión}
+% =====================================================
+
+El desarrollo de PokeHash permitió aplicar de forma integrada los conceptos fundamentales de las Estructuras de Datos en C, resultando en una aplicación funcional y de alto rendimiento computacional para la gestión táctica de equipos Pokémon.
+
+La decisión arquitectónica más relevante fue la \textbf{indexación dual}: dos Tablas Hash operando en paralelo, una por nombre y otra por ID. Esta decisión elevó la búsqueda por número de Pokédex de $O(N)$ (recorrido lineal del mapa primario) a $O(1)$ promedio, a costa de un espacio adicional de $O(N)$ --- completamente justificado dado que las claves del segundo mapa son cadenas de máximo 4 caracteres (IDs de hasta 4 dígitos).
+
+La modelización del sistema de tipos como un \textbf{Grafo Dirigido Ponderado con Matriz de Adyacencia estática} demostró ser la elección ideal para un grafo denso y de tamaño fijo ($18\times18 = 324$ celdas). Las consultas de efectividad son en $O(1)$ absoluto, sin recorridos. En contraste, una Lista de Adyacencia para el mismo grafo denso habría requerido hasta $O(18)$ comparaciones por consulta.
+
+La \textbf{Pila estática} de 6 posiciones para el equipo fue la solución perfecta para un tamaño fijo y operaciones LIFO: agregar y deshacer son $O(1)$ exacto sin overhead de memoria dinámica.
+
+Como debilidad a reconocer, la función de filtrado por generación y tipo requiere un recorrido completo de $O(N)$ porque la Tabla Hash primaria está indexada únicamente por nombre. Una mejora futura consistiría en agregar un Mapa Múltiple indexado por tipo elemental (aprovechando el TDA \texttt{multimap.h} disponible en el proyecto), que permitiría filtrar en $O(\text{resultados})$ sin revisar el catálogo completo.
+
+En síntesis, PokeHash demuestra el dominio práctico de cuatro estructuras fundamentales --- Tabla Hash con Encadenamiento, Lista Enlazada Simple, Pila con Arreglo Estático y Grafo con Matriz de Adyacencia --- y su integración coordinada en un sistema de búsqueda de alta eficiencia, con gestión rigurosa de memoria dinámica y cero fugas (\emph{zero memory leaks}) al finalizar la ejecución.
 
 \end{document}
