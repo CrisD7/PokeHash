@@ -125,6 +125,9 @@ void cargar_data(){
         }
     }
     fclose(archivo);
+
+    // Cargar la matriz de efectividades de tipos desde Tabla.csv
+    cargar_matriz_debilidades();
 }
 
 static void mostrar_detalles_pokemon(Pokemon *p) {
@@ -622,89 +625,113 @@ void analizar_debilidades(Equipo *e) {
     if (e == NULL) return;
     if (e->tope == 0) {
         printf("\n[!] El equipo está vacío. No hay Pokémon para analizar.\n");
+        presioneTeclaParaContinuar();
         return;
     }
 
-    int conteo_debilidades_equipo[NUM_TIPOS] = {0};
-    int hay_debilidad_x4_global = 0;
+    // Nombres de tipos en español y mayúsculas para la salida
+    static const char *TIPOS_ES[NUM_TIPOS] = {
+        "NORMAL", "FUEGO", "AGUA", "ELÉCTRICO", "PLANTA", "HIELO",
+        "LUCHA", "VENENO", "TIERRA", "VOLADOR", "PSÍQUICO", "BICHO",
+        "ROCA", "FANTASMA", "DRAGÓN", "SINIESTRO", "ACERO", "HADA"
+    };
 
-    printf("\n==================================================\n");
-    printf("           ANÁLISIS TÁCTICO DEL EQUIPO            \n");
-    printf("==================================================\n");
+    // Arreglos de análisis por Pokémon
+    int conteo_debilidades[NUM_TIPOS] = {0};
+    int es_x4[6][NUM_TIPOS];    // 1 si el Pokémon i tiene debilidad x4 al tipo j
+    int es_inmune[6][NUM_TIPOS]; // 1 si el Pokémon i es inmune al tipo j
+    memset(es_x4, 0, sizeof(es_x4));
+    memset(es_inmune, 0, sizeof(es_inmune));
 
-    for (int i = 0 ; i < e->tope ; i++) {
+    // === PRIMERA PASADA: recopilar datos ===
+    for (int i = 0; i < e->tope; i++) {
         Pokemon *p = e->integrantes[i];
 
-        int tiene_debilidades_individuales = 0;
+        char *t2 = p->tipo2;
+        while (*t2 == ' ') t2++;
+        int tiene_tipo2 = (strlen(t2) > 0);
 
-        List *debilidades = list_create();
-        if (debilidades == NULL) return;
+        int tipo1_idx = obtener_indice_tipo(p->tipo1);
+        int tipo2_idx = tiene_tipo2 ? obtener_indice_tipo(t2) : -1;
 
-        printf("\n> %s (Tipo: %s / %s):\n", p->nombre, p->tipo1, 
-               (strlen(p->tipo2) > 0 && strcmp(p->tipo2, " ") != 0) ? p->tipo2 : "Ninguno");
+        for (int j = 0; j < NUM_TIPOS; j++) {
+            float mult = 1.0f;
+            if (tipo1_idx != -1) mult *= matrizDebilidades[j][tipo1_idx];
+            if (tipo2_idx != -1) mult *= matrizDebilidades[j][tipo2_idx];
 
-        for (int j = 0 ; j < NUM_TIPOS ; j++) {
-            float multiplicador = 1.0;
-
-            // tipo1
-            int tipo1_index = obtener_indice_tipo(p->tipo1);
-            if (tipo1_index != -1) {
-                multiplicador *= matrizDebilidades[j][tipo1_index];
+            if (mult > 1.0f) {
+                conteo_debilidades[j]++;
+                if (mult > 2.0f) es_x4[i][j] = 1;
             }
-            
-            // Verificar tipo2
-            char *t2 = p->tipo2;
-            while (*t2 == ' ') t2++;
-            if (strlen(t2) > 0) {
-                int tipo2_index = obtener_indice_tipo(t2);
-                if (tipo2_index != -1) {
-                    multiplicador *= matrizDebilidades[j][tipo2_index];
-                }
-            }
-
-            if (multiplicador > 1.0) {
-                tiene_debilidades_individuales = 1;
-                const char *nombre_tipo_debil = obtener_nombre_tipo(j);
-
-                list_pushBack(debilidades, (void *)nombre_tipo_debil);
-                conteo_debilidades_equipo[j]++;
-
-                if (multiplicador > 2.0) {
-                    printf("  [CRÍTICO] ¡Débil x4 al tipo %s!\n", nombre_tipo_debil);
-                    hay_debilidad_x4_global = 1;
-                }
-                else {
-                    printf("  - Débil al tipo %s (x2)\n", nombre_tipo_debil);
-                }
-            }
+            if (mult == 0.0f) es_inmune[i][j] = 1;
         }
-
-        if (!tiene_debilidades_individuales) {
-            printf("  - ¡No tiene debilidades elementales! (Excelente cobertura)\n");
-        }
-
-        list_clean(debilidades);
-        free(debilidades);
     }
 
+    // === SEGUNDA PASADA: imprimir resultados ===
     printf("\n==================================================\n");
-    printf("         ALERTAS DE COBERTURA GLOBAL             \n");
+    printf("        ANÁLISIS TÁCTICO DEL EQUIPO\n");
     printf("==================================================\n");
 
-    int hay_debilidades_compartidas = 0;
-    for (int j = 0 ; j < NUM_TIPOS ; j++) {
-        if (conteo_debilidades_equipo[j] >= 2) {
-            printf("[ALERTA] %d integrantes de tu equipo son débiles al tipo: %s\n", 
-                   conteo_debilidades_equipo[j], obtener_nombre_tipo(j));
-            hay_debilidades_compartidas = 1;
+    // --- Sección 1: Resumen de Vulnerabilidades ---
+    printf("\n[-] RESUMEN DE VULNERABILIDADES:\n");
+    int hay_alerta = 0;
+    for (int j = 0; j < NUM_TIPOS; j++) {
+        if (conteo_debilidades[j] >= 3) {
+            printf("    * [ALERTA] %d integrantes son débiles al tipo %s.\n",
+                   conteo_debilidades[j], TIPOS_ES[j]);
+            hay_alerta = 1;
         }
     }
-
-    if (!hay_debilidades_compartidas && !hay_debilidad_x4_global) {
-        printf("[OK] ¡Tu equipo tiene una excelente sinergia de tipos! Sin debilidades críticas compartidas.\n");
+    if (!hay_alerta) {
+        printf("    * El equipo está balanceado. Ningún tipo amenaza a más de 2 integrantes.\n");
     }
+
+    // --- Sección 2: Debilidades Extremas (x4) ---
+    printf("\n[-] DEBILIDADES EXTREMAS (Cuidado con los x4):\n");
+    int hay_x4 = 0;
+    for (int i = 0; i < e->tope; i++) {
+        for (int j = 0; j < NUM_TIPOS; j++) {
+            if (es_x4[i][j]) {
+                printf("    * %s (Débil x4 a %s)\n",
+                       e->integrantes[i]->nombre, TIPOS_ES[j]);
+                hay_x4 = 1;
+            }
+        }
+    }
+    if (!hay_x4) {
+        printf("    * Ningún integrante tiene debilidades x4. ¡Excelente!\n");
+    }
+
+    // --- Sección 3: Inmunidades del Equipo ---
+    printf("\n[-] INMUNIDADES DEL EQUIPO (Cambios seguros):\n");
+    int hay_inmunidad = 0;
+    for (int i = 0; i < e->tope; i++) {
+        // Recopilar índices de inmunidades de este Pokémon
+        int indices[NUM_TIPOS];
+        int num_inmune = 0;
+        for (int j = 0; j < NUM_TIPOS; j++) {
+            if (es_inmune[i][j]) indices[num_inmune++] = j;
+        }
+
+        if (num_inmune > 0) {
+            hay_inmunidad = 1;
+            printf("    * %s es INMUNE a ", e->integrantes[i]->nombre);
+            for (int k = 0; k < num_inmune; k++) {
+                if (k > 0 && k == num_inmune - 1)
+                    printf(" y %s", TIPOS_ES[indices[k]]);
+                else if (k > 0)
+                    printf(", %s", TIPOS_ES[indices[k]]);
+                else
+                    printf("%s", TIPOS_ES[indices[k]]);
+            }
+            printf(".\n");
+        }
+    }
+    if (!hay_inmunidad) {
+        printf("    * Ningún integrante tiene inmunidades.\n");
+    }
+
     printf("==================================================\n");
-    
     presioneTeclaParaContinuar();
 }
 
@@ -795,7 +822,7 @@ void ver_equipo_actual(Equipo *e) {
 
 void menu_gestion_equipo(Equipo *e) {
     int opcion_sub = 0;
-    while (opcion_sub != 4) {
+    while (opcion_sub != 5) {
         limpiarPantalla();
         printf("\n========================================\n");
         printf("       GESTIÓN ESTRATÉGICA DE EQUIPO    \n");
@@ -803,7 +830,8 @@ void menu_gestion_equipo(Equipo *e) {
         printf("1. Agregar Pokémon al Equipo\n");
         printf("2. Ver Equipo Actual\n");
         printf("3. Deshacer última adición\n");
-        printf("4. Volver al menú principal\n");
+        printf("4. Analizar Debilidades del Equipo\n");
+        printf("5. Volver al menú principal\n");
         printf("========================================\n");
         printf("Seleccione una opción: ");
 
@@ -834,6 +862,10 @@ void menu_gestion_equipo(Equipo *e) {
                 presioneTeclaParaContinuar();
                 break;
             case 4:
+                limpiarPantalla();
+                analizar_debilidades(e);
+                break;
+            case 5:
                 // Volver
                 break;
             default:

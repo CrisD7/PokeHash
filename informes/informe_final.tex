@@ -231,6 +231,26 @@ La aplicación se organiza en un menú principal con dos submenús funcionales:
     \item Pokémon no encontrado: \texttt{"[!] Pokémon ''X'' no encontrado en la Pokédex."}.
 \end{itemize}
 
+\subsubsection{Analizar Debilidades del Equipo}
+
+\textbf{Escenario ideal:}
+\begin{enumerate}
+    \item El usuario tiene un equipo con al menos un Pokémon y selecciona la opción \textbf{Analizar Debilidades}.
+    \item Por cada integrante, el sistema muestra sus debilidades elementales:
+    \begin{itemize}
+        \item \texttt{"  - Débil al tipo Ice (x2)"} para multiplicador $\times 2$.
+        \item \texttt{"  [CRÍTICO] ¡Débil x4 al tipo Rock!"} para multiplicador $\times 4$.
+    \end{itemize}
+    \item Tras el análisis individual, el sistema emite alertas globales si 2 o más integrantes comparten debilidad al mismo tipo: \texttt{"[ALERTA] X integrantes de tu equipo son débiles al tipo: Y"}.
+    \item Si no hay alertas, se confirma: \texttt{"[OK] ¡Tu equipo tiene una excelente sinergia de tipos!"}.
+\end{enumerate}
+
+\textbf{Escenarios de error:}
+\begin{itemize}
+    \item Equipo vacío: \texttt{"[!] El equipo está vacío. No hay Pokémon para analizar."}.
+    \item Tipo no reconocido en la enumeración: \texttt{obtener\_indice\_tipo} retorna \texttt{-1} y ese tipo se omite sin abortar el análisis.
+\end{itemize}
+
 % =====================================================
 \section{Arquitectura de Datos y Estructuras}
 % =====================================================
@@ -423,6 +443,20 @@ En esta sección se describe la lógica de cada funcionalidad usando exclusivame
     \item Al terminar la iteración, se imprime el total de coincidencias.
 \end{enumerate}
 
+\subsubsection{Analizar Debilidades del Equipo (\texttt{analizar\_debilidades})}
+
+\begin{enumerate}
+    \item Se verifica que el \textbf{Equipo Activo} tenga al menos un integrante (\texttt{tope} $> 0$); en caso contrario se notifica y se retorna.
+    \item Se declara un arreglo estático \texttt{conteo\_debilidades\_equipo[NUM\_TIPOS]}, inicializado en cero, para acumular cuántos integrantes son débiles a cada tipo.
+    \item Para cada uno de los $k$ Pokémon del equipo ($i = 0 \ldots \texttt{tope}-1$):
+    \begin{enumerate}
+        \item Se obtiene el índice de \texttt{tipo1} llamando a \texttt{obtener\_indice\_tipo()}, que recorre linealmente el arreglo \texttt{NOMBRES\_TIPOS[18]} con \texttt{strcasecmp}: $O(T)=O(1)$.
+        \item Para cada tipo atacante $j$ (0 a 17), se calcula el multiplicador efectivo de daño consultando la \textbf{Red de Efectividades}: $\texttt{multiplicador} = \texttt{matrizDebilidades}[j][\text{tipo1}] \times \texttt{matrizDebilidades}[j][\text{tipo2}]$, acceso en $O(1)$ absoluto.
+        \item Si el multiplicador $> 1.0$, se imprime la debilidad (indicando si es $\times 2$ o $\times 4$ crítico) y se incrementa \texttt{conteo\_debilidades\_equipo[j]}.
+    \end{enumerate}
+    \item Tras el bucle de integrantes, se recorre el arreglo de conteo (18 posiciones) para emitir alertas globales por tipos compartidos: $O(T) = O(1)$.
+\end{enumerate}
+
 \subsection{Algoritmo Core: Ranking Top 10 (\texttt{mejores10PorStat})}
 
 Este es el algoritmo de mayor complejidad lógica del sistema. Combina el recorrido del mapa con el mantenimiento de un \textbf{ranking de top-$K$ en tiempo lineal}:
@@ -464,6 +498,7 @@ En la siguiente tabla se presenta el análisis de peor caso (\emph{Worst-Case}) 
 \texttt{buscar\_por\_filtro\_gen\_tipo()} & $O(N)$ & $O(N)$ & $O(1)$ \\
 \texttt{mejores10PorStat()} & $O(N)$ & $O(N)$ & $O(1)$ \\
 \texttt{agregar\_pokemon\_equipo()} & $O(1)$ & $O(N)^{*}$ & $O(1)$ \\
+\texttt{analizar\_debilidades()} & $O(k \cdot T^2) = O(1)$ & $O(1)$ & $O(1)$ \\
 \texttt{deshacer()} & $O(1)$ & $O(1)$ & $O(1)$ \\
 \texttt{ver\_equipo\_actual()} & $O(k) = O(1)$ & $O(1)$ & $O(1)$ \\
 \texttt{liberar\_pokedex()} & $O(N)$ & $O(N)$ & $O(1)$ \\
@@ -503,6 +538,17 @@ Total: $N$ iteraciones de $O(1) = O(N)$. La complejidad espacial es $O(1)$ ya qu
 \subsubsection{\texttt{deshacer()}: $O(1)$ estricto}
 
 La operación de deshacer ejecuta exactamente una instrucción de decremento aritmético sobre el entero \texttt{tope}. No accede a memoria dinámica, no recorre ninguna estructura, no llama a \texttt{free()}. La complejidad es $O(1)$ exacto en todos los casos posibles.
+
+\subsubsection{\texttt{analizar\_debilidades()}: $O(1)$ con $k \leq 6$ y $T = 18$ constantes}
+
+La función ejecuta tres bucles anidados, pero todos acotados por constantes del dominio del juego:
+\begin{itemize}
+    \item \textbf{Bucle externo} sobre integrantes: $k \leq 6$ iteraciones.
+    \item \textbf{Bucle interno} sobre tipos atacantes: $T = 18$ iteraciones fijas.
+    \item \textbf{Por cada par} $(i, j)$: dos llamadas a \texttt{obtener\_indice\_tipo} (recorrido lineal de 18 elementos = $O(T) = O(1)$) y dos accesos directos a \texttt{matrizDebilidades[j][tipo]} ($O(1)$ absoluto).
+\end{itemize}
+Costo total: $O(k \cdot T \cdot T) = O(6 \cdot 18 \cdot 18) = O(1944) = \mathbf{O(1)}$ exacto. Ninguna variable escala con el tamaño del catálogo $N$. El arreglo auxiliar \texttt{conteo\_debilidades\_equipo[18]} tiene tamaño fijo $\Rightarrow O(1)$ espacial.
+\textbf{Observación:} \texttt{obtener\_indice\_tipo} se llama dentro del bucle interno, lo que genera hasta $2 \times 18 = 36$ llamadas redundantes por Pokémon. Una optimización directa es precomputar ambos índices antes del bucle $j$, reduciendo las llamadas de $O(k \cdot T)$ a $O(k)$ sin alterar la complejidad asintótica (ambas son $O(1)$), pero mejorando el rendimiento constante.
 
 \subsubsection{\texttt{liberar\_pokedex()}: $O(N)$ con doble responsabilidad de propiedad}
 
