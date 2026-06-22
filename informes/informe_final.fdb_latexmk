@@ -1,7 +1,7 @@
 # Fdb version 4
-["pdflatex"] 1782099207.92634 "/home/cris/PokeHash/PokeHash/informes/informe_final.tex" "informe_final.pdf" "informe_final" 1782099208.85893 0
+["pdflatex"] 1782099819.84327 "/home/cris/PokeHash/PokeHash/informes/informe_final.tex" "informe_final.pdf" "informe_final" 1782099820.86349 0
   "/etc/texmf/web2c/texmf.cnf" 1782069323.95471 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/cris/PokeHash/PokeHash/informes/informe_final.tex" 1782099207.64273 43148 8aa056a93649162df9307570a2ec2f06 ""
+  "/home/cris/PokeHash/PokeHash/informes/informe_final.tex" 1782099819.44921 41715 a83f0e739e189e82c83e21b2431eed12 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcrm1200.tfm" 1136768653 1536 74b7293ec3713bb7fdca8dd1bd1f469c ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
@@ -121,10 +121,10 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1782069356.04567 5472669 54eaf61a88b6b7896ebd0dac973cb29c ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1782069370 8213024 11db56f77d6835d145805db26c1ba68c ""
   "carta_gantt.png" 1782098336.12539 140803 44108170a0cbcd8755a5cb9ca9ea411f ""
-  "informe_final.aux" 1782099208.7681 10862 3329d6297986b855e258e3932aa91ef9 "pdflatex"
-  "informe_final.out" 1782099208.77202 11680 ced8e935bfaed2d977cf9adb71c6ddb4 "pdflatex"
-  "informe_final.tex" 1782099207.64273 43148 8aa056a93649162df9307570a2ec2f06 ""
-  "informe_final.toc" 1782099208.77202 5948 ab127278427336ed390376978bd895be "pdflatex"
+  "informe_final.aux" 1782099820.76083 10862 3329d6297986b855e258e3932aa91ef9 "pdflatex"
+  "informe_final.out" 1782099820.76475 11680 ced8e935bfaed2d977cf9adb71c6ddb4 "pdflatex"
+  "informe_final.tex" 1782099819.44921 41715 a83f0e739e189e82c83e21b2431eed12 ""
+  "informe_final.toc" 1782099820.76475 5948 ab127278427336ed390376978bd895be "pdflatex"
   (generated)
   "informe_final.aux"
   "informe_final.log"
