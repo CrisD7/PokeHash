@@ -144,25 +144,25 @@ La aplicación se organiza en un menú principal con dos submenús funcionales:
 
 \begin{itemize}[leftmargin=1.5cm]
     \item \textbf{Menú Principal}
-    \begin{itemize}
-        \item \textbf{1. Explorar Pokédex}
-        \begin{itemize}
-            \item 1. Buscar por Nombre
-            \item 2. Buscar por Número de Pokédex
-            \item 3. Buscar con Filtro (Generación y Tipo)
-            \item 4. Mejores 10 por Estadística
-            \item 5. Volver al Menú Principal
-        \end{itemize}
-        \item \textbf{2. Gestión Estratégica de Equipo}
-        \begin{itemize}
-            \item 1. Agregar Pokémon al Equipo
-            \item 2. Ver Equipo Actual
-            \item 3. Deshacer Última Adición
-            \item 4. Volver al Menú Principal
-        \end{itemize}
-        \item \textbf{3. Exportar Equipo a Archivo}
-        \item \textbf{4. Salir}
-    \end{itemize}
+          \begin{itemize}
+              \item \textbf{1. Explorar Pokédex}
+                    \begin{itemize}
+                        \item 1. Buscar por Nombre
+                        \item 2. Buscar por Número de Pokédex
+                        \item 3. Buscar con Filtro (Generación y Tipo)
+                        \item 4. Mejores 10 por Estadística
+                        \item 5. Volver al Menú Principal
+                    \end{itemize}
+              \item \textbf{2. Gestión Estratégica de Equipo}
+                    \begin{itemize}
+                        \item 1. Agregar Pokémon al Equipo
+                        \item 2. Ver Equipo Actual
+                        \item 3. Deshacer Última Adición
+                        \item 4. Volver al Menú Principal
+                    \end{itemize}
+              \item \textbf{3. Exportar Equipo a Archivo}
+              \item \textbf{4. Salir}
+          \end{itemize}
 \end{itemize}
 
 \subsection{Flujo de Interacción Detallado}
@@ -375,12 +375,12 @@ En esta sección se describe la lógica de cada funcionalidad usando exclusivame
     \item Se inicializan las instancias \textbf{Pokédex por Nombre} y \textbf{Pokédex por ID} con la operación \texttt{crear(comparador)}.
     \item Se abre el archivo \texttt{Pokemon.csv} y se descarta la primera línea (cabecera).
     \item Por cada registro del archivo:
-    \begin{enumerate}
-        \item Se crea una nueva entidad \texttt{Pokemon} con sus campos parseados.
-        \item Se genera el nombre único aplicando las reglas de composición de forma regional.
-        \item Se aplica \texttt{insertar(nombre, Pokemon)} sobre la \textbf{Pokédex por Nombre}.
-        \item Se convierte el ID entero a cadena de texto y se aplica \texttt{insertar(id\_texto, Pokemon)} sobre la \textbf{Pokédex por ID}.
-    \end{enumerate}
+          \begin{enumerate}
+              \item Se crea una nueva entidad \texttt{Pokemon} con sus campos parseados.
+              \item Se genera el nombre único aplicando las reglas de composición de forma regional.
+              \item Se aplica \texttt{insertar(nombre, Pokemon)} sobre la \textbf{Pokédex por Nombre}.
+              \item Se convierte el ID entero a cadena de texto y se aplica \texttt{insertar(id\_texto, Pokemon)} sobre la \textbf{Pokédex por ID}.
+          \end{enumerate}
     \item Se repite hasta leer todos los registros. La operación \texttt{insertar} ignora automáticamente los duplicados, por lo que Pokémon con formas regionales que comparten ID solo quedan indexados por el nombre de su primera aparición en el segundo mapa.
 \end{enumerate}
 
@@ -415,11 +415,11 @@ En esta sección se describe la lógica de cada funcionalidad usando exclusivame
     \item Se leen la generación (entero) y el tipo elemental (cadena) ingresados por el usuario.
     \item Se inicia la iteración sobre la \textbf{Pokédex por Nombre} con la operación \texttt{primero()}.
     \item Por cada \texttt{Pokemon} obtenido con \texttt{siguiente()}:
-    \begin{enumerate}
-        \item Se verifica si \texttt{Pokemon.gen} coincide con la generación buscada.
-        \item Se verifica si \texttt{Pokemon.tipo1} o \texttt{Pokemon.tipo2} coincide con el tipo buscado (insensible a mayúsculas).
-        \item Si ambas condiciones se cumplen, se imprime la fila del Pokémon.
-    \end{enumerate}
+          \begin{enumerate}
+              \item Se verifica si \texttt{Pokemon.gen} coincide con la generación buscada.
+              \item Se verifica si \texttt{Pokemon.tipo1} o \texttt{Pokemon.tipo2} coincide con el tipo buscado (insensible a mayúsculas).
+              \item Si ambas condiciones se cumplen, se imprime la fila del Pokémon.
+          \end{enumerate}
     \item Al terminar la iteración, se imprime el total de coincidencias.
 \end{enumerate}
 
@@ -431,11 +431,11 @@ Este es el algoritmo de mayor complejidad lógica del sistema. Combina el recorr
     \item El usuario especifica el modo (1 stat o suma de 2 stats) y un filtro opcional (toda la Pokédex, por generación, o por tipo).
     \item Se inicializa un \textbf{Arreglo Estático Ordenado Descendentemente de $K=10$ posiciones}, con puntajes iniciales de $-1$.
     \item Se inicia la iteración sobre la \textbf{Pokédex por Nombre}:
-    \begin{enumerate}
-        \item Si el Pokémon no cumple el filtro activo, se avanza sin procesarlo.
-        \item Se calcula el puntaje del Pokémon (stat seleccionada, o suma de dos stats).
-        \item \textbf{Si el puntaje es mayor que el décimo lugar del arreglo:} se busca la posición correcta de inserción recorriendo el arreglo de manera descendente, se desplazan los elementos hacia abajo y se inserta el nuevo Pokémon. Este proceso toma $O(K) = O(10) = O(1)$ por ser $K$ constante.
-    \end{enumerate}
+          \begin{enumerate}
+              \item Si el Pokémon no cumple el filtro activo, se avanza sin procesarlo.
+              \item Se calcula el puntaje del Pokémon (stat seleccionada, o suma de dos stats).
+              \item \textbf{Si el puntaje es mayor que el décimo lugar del arreglo:} se busca la posición correcta de inserción recorriendo el arreglo de manera descendente, se desplazan los elementos hacia abajo y se inserta el nuevo Pokémon. Este proceso toma $O(K) = O(10) = O(1)$ por ser $K$ constante.
+          \end{enumerate}
     \item Tras recorrer los $N$ Pokémon del catálogo, el arreglo contiene el Top-10 ordenado, que se imprime.
 \end{enumerate}
 
@@ -450,27 +450,27 @@ Este es el algoritmo de mayor complejidad lógica del sistema. Combina el recorr
 En la siguiente tabla se presenta el análisis de peor caso (\emph{Worst-Case}) de todas las funciones del sistema. $N$ es el número total de Pokémon ($\sim$1.100), $k$ el número de integrantes del equipo ($0 \leq k \leq 6$), $\alpha$ el factor de carga del hash ($\approx 5.5$) y $T = 18$ el número de tipos elementales.
 
 \begin{table}[H]
-\centering
-\caption{Complejidad de las funciones de PokeHash}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{@{}lXXX@{}}
-\toprule
-\textbf{Función} & \textbf{Caso Promedio} & \textbf{Peor Caso} & \textbf{Esp. Adicional} \\
-\midrule
-\texttt{cargar\_data()} & $O(N)$ & $O(N)$ & $O(N)$ \\
-\texttt{cargar\_matriz\_debilidades()} & $O(T^2) = O(1)$ & $O(1)$ & $O(1)$ \\
-\texttt{buscar\_por\_nombre()} & $O(1)$ & $O(N)^{*}$ & $O(1)$ \\
-\texttt{buscar\_por\_id()} & $O(1)$ & $O(N)^{*}$ & $O(1)$ \\
-\texttt{buscar\_por\_filtro\_gen\_tipo()} & $O(N)$ & $O(N)$ & $O(1)$ \\
-\texttt{mejores10PorStat()} & $O(N)$ & $O(N)$ & $O(1)$ \\
-\texttt{agregar\_pokemon\_equipo()} & $O(1)$ & $O(N)^{*}$ & $O(1)$ \\
-\texttt{deshacer()} & $O(1)$ & $O(1)$ & $O(1)$ \\
-\texttt{ver\_equipo\_actual()} & $O(k) = O(1)$ & $O(1)$ & $O(1)$ \\
-\texttt{liberar\_pokedex()} & $O(N)$ & $O(N)$ & $O(1)$ \\
-\bottomrule
-\multicolumn{4}{l}{\small $^{*}$ El peor caso teórico $O(N)$ ocurre solo si la función hash genera colisión total (todos los N}\\
-\multicolumn{4}{l}{\small \phantom{$^{*}$} elementos en el mismo bucket). En la práctica con DJB2 y 200 buckets esto es extremadamente improbable.}
-\end{tabularx}
+    \centering
+    \caption{Complejidad de las funciones de PokeHash}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabularx}{\textwidth}{@{}lXXX@{}}
+        \toprule
+        \textbf{Función}                          & \textbf{Caso Promedio} & \textbf{Peor Caso} & \textbf{Esp. Adicional}               \\
+        \midrule
+        \texttt{cargar\_data()}                   & $O(N)$                 & $O(N)$             & $O(N)$                                \\
+        \texttt{cargar\_matriz\_debilidades()}    & $O(T^2) = O(1)$        & $O(1)$             & $O(1)$                                \\
+        \texttt{buscar\_por\_nombre()}            & $O(1)$                 & $O(N)^{*}$         & $O(1)$                                \\
+        \texttt{buscar\_por\_id()}                & $O(1)$                 & $O(N)^{*}$         & $O(1)$                                \\
+        \texttt{buscar\_por\_filtro\_gen\_tipo()} & $O(N)$                 & $O(N)$             & $O(1)$                                \\
+        \texttt{mejores10PorStat()}               & $O(N)$                 & $O(N)$             & $O(1)$                                \\
+        \texttt{agregar\_pokemon\_equipo()}       & $O(1)$                 & $O(N)^{*}$         & $O(1)$                                \\
+        \texttt{deshacer()}                       & $O(1)$                 & $O(1)$             & $O(1)$                                \\
+        \texttt{ver\_equipo\_actual()}            & $O(k) = O(1)$          & $O(1)$             & $O(1)$                                \\
+        \texttt{liberar\_pokedex()}               & $O(N)$                 & $O(N)$             & $O(1)$                                \\
+        \bottomrule
+        \multicolumn{4}{l}{\small $^{*}$ El peor caso teórico $O(N)$ ocurre solo si la función hash genera colisión total (todos los N} \\
+        \multicolumn{4}{l}{\small \phantom{$^{*}$} elementos en el mismo bucket). En la práctica con DJB2 y 200 buckets esto es extremadamente improbable.}
+    \end{tabularx}
 \end{table}
 
 \subsection{Justificación de Bajo Nivel}
@@ -600,38 +600,38 @@ Supervisor final de la arquitectura. Coordinó la unión de los módulos de carg
 \subsection{Lista de Tareas Realizadas por Integrante}
 
 \begin{table}[H]
-\centering
-\caption{Distribución de tareas del proyecto PokeHash}
-\renewcommand{\arraystretch}{1.4}
-\begin{tabularx}{\textwidth}{@{}lX@{}}
-\toprule
-\textbf{Integrante} & \textbf{Tareas Realizadas} \\
-\midrule
-Cristóbal Sazo &
-Diseño de la arquitectura dual de mapas hash.
-Implementación de \texttt{cargar\_data()} con doble inserción.
-Implementación de \texttt{liberar\_pokedex()} con doble iteración y modelo de propiedad asimétrico.
-Resolución de bugs de gestión de memoria. \\
-\midrule
-Sebastián Riveros &
-Redacción del Informe de Avance e Informe Final.
-Documentación técnica de TDAs, complejidades y estructuras físicas.
-Implementación de la función de comparación insensible a mayúsculas (\texttt{string\_is\_equal} con \texttt{strcasecmp}).
-Generación del \texttt{README.md} del repositorio. \\
-\midrule
-Simón Guzmán &
-Gestión del repositorio Git (ramas, merges y resolución de conflictos).
-Implementación de \texttt{menu\_explorar\_pokedex()} y sus tres subfunciones de búsqueda.
-Validación de entradas del usuario (limpieza de buffer, trim de strings, manejo de EOF).
-Pruebas de integración y manejo de errores. \\
-\midrule
-Bruno Orellana &
-Implementación de \texttt{mejores10PorStat()} con algoritmo de ventana Top-10.
-Implementación de \texttt{cargar\_matriz\_debilidades()} desde \texttt{Tabla.csv}.
-Implementación del módulo de gestión de equipo (\texttt{agregar\_pokemon\_equipo}, \texttt{ver\_equipo\_actual}, \texttt{deshacer}).
-Pruebas de estrés con datos inválidos y casos borde. \\
-\bottomrule
-\end{tabularx}
+    \centering
+    \caption{Distribución de tareas del proyecto PokeHash}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabularx}{\textwidth}{@{}lX@{}}
+        \toprule
+        \textbf{Integrante} & \textbf{Tareas Realizadas}     \\
+        \midrule
+        Cristóbal Sazo      &
+        Diseño de la arquitectura dual de mapas hash.
+        Implementación de \texttt{cargar\_data()} con doble inserción.
+        Implementación de \texttt{liberar\_pokedex()} con doble iteración y modelo de propiedad asimétrico.
+        Resolución de bugs de gestión de memoria.            \\
+        \midrule
+        Sebastián Riveros   &
+        Redacción del Informe de Avance e Informe Final.
+        Documentación técnica de TDAs, complejidades y estructuras físicas.
+        Implementación de la función de comparación insensible a mayúsculas (\texttt{string\_is\_equal} con \texttt{strcasecmp}).
+        Generación del \texttt{README.md} del repositorio.   \\
+        \midrule
+        Simón Guzmán        &
+        Gestión del repositorio Git (ramas, merges y resolución de conflictos).
+        Implementación de \texttt{menu\_explorar\_pokedex()} y sus tres subfunciones de búsqueda.
+        Validación de entradas del usuario (limpieza de buffer, trim de strings, manejo de EOF).
+        Pruebas de integración y manejo de errores.          \\
+        \midrule
+        Bruno Orellana      &
+        Implementación de \texttt{mejores10PorStat()} con algoritmo de ventana Top-10.
+        Implementación de \texttt{cargar\_matriz\_debilidades()} desde \texttt{Tabla.csv}.
+        Implementación del módulo de gestión de equipo (\texttt{agregar\_pokemon\_equipo}, \texttt{ver\_equipo\_actual}, \texttt{deshacer}).
+        Pruebas de estrés con datos inválidos y casos borde. \\
+        \bottomrule
+    \end{tabularx}
 \end{table}
 
 \subsection{Carta Gantt}
