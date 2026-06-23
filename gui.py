@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import csv
+import subprocess
+import json
 import os
+import sys
 
 # ==============================================================================
 # CONFIGURACIÓN DE COLORES Y CONSTANTES ESTRATÉGICAS
@@ -41,71 +43,96 @@ TYPE_COLORS = {
     'Fairy': '#EE99AC'
 }
 
-# Matriz de efectividad de tipos (Atacante -> Defensor)
-# Si no está en el diccionario secundario, el daño es neutral (1.0)
-TYPE_EFFECTIVENESS = {
-    'Normal': {'Rock': 0.5, 'Ghost': 0.0, 'Steel': 0.5},
-    'Fire': {'Fire': 0.5, 'Water': 0.5, 'Grass': 2.0, 'Ice': 2.0, 'Bug': 2.0, 'Rock': 0.5, 'Dragon': 0.5, 'Steel': 2.0},
-    'Water': {'Fire': 2.0, 'Water': 0.5, 'Grass': 0.5, 'Ground': 2.0, 'Rock': 2.0, 'Dragon': 0.5},
-    'Electric': {'Water': 2.0, 'Electric': 0.5, 'Grass': 0.5, 'Ground': 0.0, 'Flying': 2.0, 'Dragon': 0.5},
-    'Grass': {'Fire': 0.5, 'Water': 2.0, 'Grass': 0.5, 'Poison': 0.5, 'Ground': 2.0, 'Flying': 0.5, 'Bug': 0.5, 'Rock': 2.0, 'Dragon': 0.5, 'Steel': 0.5},
-    'Ice': {'Fire': 0.5, 'Water': 0.5, 'Grass': 2.0, 'Ice': 0.5, 'Ground': 2.0, 'Flying': 2.0, 'Dragon': 2.0, 'Steel': 0.5},
-    'Fighting': {'Normal': 2.0, 'Ice': 2.0, 'Fighting': 1.0, 'Poison': 0.5, 'Flying': 0.5, 'Psychic': 0.5, 'Bug': 0.5, 'Rock': 2.0, 'Ghost': 0.0, 'Dark': 2.0, 'Steel': 2.0, 'Fairy': 0.5},
-    'Poison': {'Grass': 2.0, 'Poison': 0.5, 'Ground': 0.5, 'Rock': 0.5, 'Ghost': 0.5, 'Steel': 0.0, 'Fairy': 2.0},
-    'Ground': {'Fire': 2.0, 'Electric': 2.0, 'Grass': 0.5, 'Poison': 2.0, 'Flying': 0.0, 'Bug': 0.5, 'Rock': 2.0, 'Steel': 2.0},
-    'Flying': {'Electric': 0.5, 'Grass': 2.0, 'Fighting': 2.0, 'Bug': 2.0, 'Rock': 0.5, 'Steel': 0.5},
-    'Psychic': {'Fighting': 2.0, 'Poison': 2.0, 'Psychic': 0.5, 'Dark': 0.0, 'Steel': 0.5},
-    'Bug': {'Fire': 0.5, 'Fighting': 0.5, 'Poison': 0.5, 'Flying': 0.5, 'Psychic': 2.0, 'Ghost': 0.5, 'Grass': 2.0, 'Dark': 2.0, 'Steel': 0.5, 'Fairy': 0.5},
-    'Rock': {'Fire': 2.0, 'Ice': 2.0, 'Fighting': 0.5, 'Ground': 0.5, 'Flying': 2.0, 'Bug': 2.0, 'Steel': 0.5},
-    'Ghost': {'Normal': 0.0, 'Psychic': 2.0, 'Ghost': 2.0, 'Dark': 0.5},
-    'Dragon': {'Dragon': 2.0, 'Steel': 0.5, 'Fairy': 0.0},
-    'Dark': {'Fighting': 0.5, 'Psychic': 2.0, 'Ghost': 2.0, 'Dark': 0.5, 'Fairy': 0.5},
-    'Steel': {'Fire': 0.5, 'Water': 0.5, 'Electric': 0.5, 'Ice': 2.0, 'Rock': 2.0, 'Steel': 0.5, 'Fairy': 2.0},
-    'Fairy': {'Fire': 0.5, 'Fighting': 2.0, 'Poison': 0.5, 'Dragon': 2.0, 'Dark': 2.0, 'Steel': 0.5}
-}
+# ==============================================================================
+# BACKEND C — Comunicación vía subprocess stdin/stdout JSON
+# Toda la lógica reside en el binario C (pokehash_api).
+# Python solo envía comandos y renderiza los resultados.
+# ==============================================================================
+class PokeHashBackend:
+    def __init__(self):
+        # Determinar ruta del binario
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        if sys.platform == 'win32':
+            binary = os.path.join(script_dir, 'pokehash_api.exe')
+        else:
+            binary = os.path.join(script_dir, 'pokehash_api')
 
-# ==============================================================================
-# CARGA Y PROCESAMIENTO DE DATOS (MOCK / VISTA PROVISIONAL)
-# ==============================================================================
-def cargar_pokemon_desde_csv():
-    pokemon_list = []
-    if not os.path.exists("Pokemon.csv"):
-        return pokemon_list
-    
-    try:
-        with open("Pokemon.csv", mode='r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                name = row['Name'].strip()
-                form = row['Form'].strip() if row.get('Form') else ''
-                
-                # Normalización de nombre en consonancia con pokehash.c
-                if form and form != '':
-                    if name in form:
-                        nombre_completo = form
-                    else:
-                        nombre_completo = f"{name} ({form})"
-                else:
-                    nombre_completo = name
-                
-                p = {
-                    'id': int(row['ID']),
-                    'nombre': nombre_completo,
-                    'tipo1': row['Type1'].strip(),
-                    'tipo2': row['Type2'].strip() if row.get('Type2') else '',
-                    'total': int(row['Total']),
-                    'hp': int(row['HP']),
-                    'ataque': int(row['Attack']),
-                    'defensa': int(row['Defense']),
-                    'ataque_esp': int(row['Sp. Atk']),
-                    'defensa_esp': int(row['Sp. Def']),
-                    'velocidad': int(row['Speed']),
-                    'gen': int(row['Generation'])
-                }
-                pokemon_list.append(p)
-    except Exception as e:
-        print(f"Error al cargar Pokemon.csv: {e}")
-    return pokemon_list
+        # Auto-compilar si no existe el binario
+        if not os.path.exists(binary):
+            print("[PokeHash] Compilando backend C...")
+            try:
+                subprocess.run(
+                    ['gcc', '-Wall', '-Wextra', '-o', binary,
+                     os.path.join(script_dir, 'pokehash_api.c'),
+                     os.path.join(script_dir, 'pokehash.c'),
+                     os.path.join(script_dir, 'tdas', 'extra.c'),
+                     os.path.join(script_dir, 'tdas', 'list.c'),
+                     os.path.join(script_dir, 'tdas', 'map.c')],
+                    check=True, capture_output=True, text=True,
+                    cwd=script_dir
+                )
+                print("[PokeHash] Backend compilado exitosamente.")
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError(f"Error al compilar backend C:\n{e.stderr}")
+
+        # Lanzar el proceso C
+        self.process = subprocess.Popen(
+            [binary],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            cwd=script_dir
+        )
+
+    def send(self, cmd_dict):
+        """Envía un comando JSON al backend C y retorna la respuesta parseada."""
+        try:
+            json_str = json.dumps(cmd_dict, ensure_ascii=False, separators=(',', ':'))
+            self.process.stdin.write(json_str + '\n')
+            self.process.stdin.flush()
+            response_line = self.process.stdout.readline()
+            if not response_line:
+                return {"status": "error", "message": "El backend C se cerró inesperadamente."}
+            return json.loads(response_line)
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def list_all(self):
+        return self.send({"cmd": "list_all"})
+
+    def search_name(self, name):
+        return self.send({"cmd": "search_name", "name": name})
+
+    def search_id(self, pokemon_id):
+        return self.send({"cmd": "search_id", "id": pokemon_id})
+
+    def team_add(self, name):
+        return self.send({"cmd": "team_add", "name": name})
+
+    def team_undo(self):
+        return self.send({"cmd": "team_undo"})
+
+    def team_remove(self, index):
+        return self.send({"cmd": "team_remove", "index": index})
+
+    def team_view(self):
+        return self.send({"cmd": "team_view"})
+
+    def team_analyze(self):
+        return self.send({"cmd": "team_analyze"})
+
+    def team_export(self, path):
+        return self.send({"cmd": "team_export", "path": path})
+
+    def close(self):
+        try:
+            self.process.stdin.write('{"cmd":"quit"}\n')
+            self.process.stdin.flush()
+            self.process.wait(timeout=2)
+        except Exception:
+            self.process.kill()
 
 # ==============================================================================
 # WIDGET PERSONALIZADO: BARRA DE ESTADÍSTICAS RE-ESCALABLE
@@ -139,12 +166,25 @@ class PokeHashGUI:
         self.root.configure(bg=COLOR_BG)
         self.root.minsize(960, 640)
         
-        # Cargar datos
-        self.all_pokemon = cargar_pokemon_desde_csv()
+        # Inicializar backend C
+        try:
+            self.backend = PokeHashBackend()
+        except RuntimeError as e:
+            messagebox.showerror("Error de Backend", str(e))
+            sys.exit(1)
+        
+        # Cargar datos desde el backend C
+        result = self.backend.list_all()
+        if result['status'] == 'ok':
+            self.all_pokemon = result['data']
+        else:
+            messagebox.showerror("Error", f"No se pudieron cargar los datos:\n{result.get('message','')}")
+            self.all_pokemon = []
+        
         self.filtered_pokemon = list(self.all_pokemon)
         
-        # Equipo Activo (Pila LIFO)
-        self.equipo = []  # Stack de diccionarios Pokémon
+        # Equipo Activo (cache local, fuente de verdad es el backend C)
+        self.equipo = []
         
         # Configurar estilos generales
         self.setup_styles()
@@ -156,6 +196,13 @@ class PokeHashGUI:
         if self.filtered_pokemon:
             self.pokedex_listbox.selection_set(0)
             self.on_select_pokemon()
+        
+        # Cerrar backend al cerrar ventana
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def on_close(self):
+        self.backend.close()
+        self.root.destroy()
 
     def setup_styles(self):
         style = ttk.Style()
@@ -189,6 +236,11 @@ class PokeHashGUI:
         subtitle_label = tk.Label(header_frame, text="•  Gestor Táctico de Pokémon", bg=COLOR_CARD, fg=COLOR_TEXT_MUTED,
                                   font=('Helvetica', 11, 'italic'))
         subtitle_label.pack(side='left', padx=5, pady=(4, 0))
+        
+        # Indicador de backend
+        backend_lbl = tk.Label(header_frame, text="⚡ Backend C Activo", bg=COLOR_CARD, fg=COLOR_SUCCESS,
+                               font=('Helvetica', 9, 'bold'))
+        backend_lbl.pack(side='right', padx=20)
         
         # ----------------------------------------------------------------------
         # MENÚ DE PESTAÑAS PERSONALIZADO (TABS)
@@ -237,6 +289,7 @@ class PokeHashGUI:
         self.tab_team_btn.config(bg=COLOR_ACCENT, fg=COLOR_TEXT_PRIMARY)
         self.pokedex_frame.pack_forget()
         self.team_frame.pack(fill='both', expand=True)
+        self.refresh_team_from_backend()
         self.update_team_tab_view()
 
     # ==============================================================================
@@ -357,6 +410,10 @@ class PokeHashGUI:
         # Rellenar lista de Pokémon por primera vez
         self.populate_pokemon_list()
 
+    def add_hover_effect(self, widget, hover_color, normal_color):
+        widget.bind("<Enter>", lambda e: widget.config(bg=hover_color))
+        widget.bind("<Leave>", lambda e: widget.config(bg=normal_color))
+
     # ==============================================================================
     # PESTAÑA 2: MI EQUIPO Y ANÁLISIS TÁCTICO
     # ==============================================================================
@@ -425,7 +482,7 @@ class PokeHashGUI:
         self.add_hover_effect(self.btn_undo, COLOR_SECONDARY_HOVER, COLOR_SECONDARY)
         
         # Botón Exportar Equipo
-        self.btn_export = tk.Button(action_buttons_frame, text="💾 Exportar Equipo (C y Python)", bg=COLOR_SUCCESS, fg=COLOR_TEXT_PRIMARY,
+        self.btn_export = tk.Button(action_buttons_frame, text="💾 Exportar Equipo", bg=COLOR_SUCCESS, fg=COLOR_TEXT_PRIMARY,
                                     font=('Helvetica', 11, 'bold'), bd=0, activebackground=COLOR_SUCCESS_HOVER,
                                     activeforeground=COLOR_TEXT_PRIMARY, height=2, command=self.export_team_file)
         self.btn_export.pack(side='right', fill='x', expand=True, padx=(5, 0))
@@ -440,7 +497,7 @@ class PokeHashGUI:
                                   font=('Helvetica', 14, 'bold'), anchor='w')
         analysis_title.pack(fill='x', padx=20, pady=(20, 5))
         
-        analysis_subtitle = tk.Label(team_right_panel, text="Multiplicadores de daño elementales compuestos sobre el equipo activo:",
+        analysis_subtitle = tk.Label(team_right_panel, text="Datos calculados por el backend C (pokehash_api):",
                                      bg=COLOR_CARD, fg=COLOR_TEXT_MUTED, font=('Helvetica', 9), anchor='w', justify='left')
         analysis_subtitle.pack(fill='x', padx=20, pady=(0, 15))
         
@@ -484,11 +541,17 @@ class PokeHashGUI:
         # Panel inferior de alertas tácticas
         self.alert_frame = tk.Frame(team_right_panel, bg=COLOR_CARD, height=80)
         self.alert_frame.pack(fill='x', side='bottom', padx=20, pady=15)
+        self.alert_frame.pack_propagate(False)
         
-        self.alert_lbl = tk.Label(self.alert_frame, text="Forma un equipo para ver alertas tácticas.",
-                                  bg='#25252d', fg=COLOR_TEXT_MUTED, font=('Helvetica', 10, 'italic'),
-                                  bd=0, height=3, relief='flat', padx=10, justify='left', wraplength=400)
-        self.alert_lbl.pack(fill='both', expand=True)
+        self.alert_scrollbar = ttk.Scrollbar(self.alert_frame)
+        self.alert_text_widget = tk.Text(self.alert_frame, bg='#25252d', fg=COLOR_TEXT_MUTED, font=('Helvetica', 10, 'italic'),
+                                         bd=0, height=3, padx=10, pady=5, state='normal', wrap='word')
+        self.alert_text_widget.insert('1.0', "Forma un equipo para ver alertas tácticas.")
+        self.alert_text_widget.config(state='disabled')
+        self.alert_text_widget.configure(yscrollcommand=self.alert_scrollbar.set)
+        self.alert_scrollbar.configure(command=self.alert_text_widget.yview)
+        
+        self.alert_text_widget.pack(fill='both', expand=True)
 
     # ==============================================================================
     # LÓGICA DE FILTRADO Y ACTUALIZACIÓN DE POKÉDEX
@@ -508,39 +571,26 @@ class PokeHashGUI:
         tipo_sel = self.tipo_filter_var.get()
         gen_sel = self.gen_filter_var.get()
         
-        filtered = []
-        for p in self.all_pokemon:
-            # Filtro por texto de búsqueda (Nombre o ID)
-            matches_query = False
-            if query == "":
-                matches_query = True
-            elif query.isdigit():
-                if query in str(p['id']):
-                    matches_query = True
-            else:
-                if query in p['nombre'].lower():
-                    matches_query = True
-                    
-            # Filtro por tipo
-            matches_tipo = False
-            if tipo_sel == "Todos":
-                matches_tipo = True
-            else:
-                if p['tipo1'] == tipo_sel or p['tipo2'] == tipo_sel:
-                    matches_tipo = True
-                    
-            # Filtro por generación
-            matches_gen = False
-            if gen_sel == "Todas":
-                matches_gen = True
-            else:
-                if str(p['gen']) == gen_sel:
-                    matches_gen = True
-                    
-            if matches_query and matches_tipo and matches_gen:
-                filtered.append(p)
-                
-        self.filtered_pokemon = filtered
+        gen_val = 0
+        if gen_sel != "Todas":
+            gen_val = int(gen_sel)
+            
+        type_val = ""
+        if tipo_sel != "Todos":
+            type_val = tipo_sel
+            
+        result = self.backend.send({
+            "cmd": "filter",
+            "gen": gen_val,
+            "type": type_val,
+            "query": query
+        })
+        
+        if result['status'] == 'ok':
+            self.filtered_pokemon = result['data']
+        else:
+            self.filtered_pokemon = []
+            
         self.populate_pokemon_list()
         
         # Seleccionar automáticamente la primera coincidencia
@@ -639,21 +689,33 @@ class PokeHashGUI:
             self.add_team_btn.config(bg=COLOR_SUCCESS, state="normal")
 
     # ==============================================================================
-    # GESTIÓN DEL EQUIPO (PILA LIFO) Y OPERACIONES
+    # GESTIÓN DEL EQUIPO — Operaciones delegadas al backend C
     # ==============================================================================
+    def refresh_team_from_backend(self):
+        """Sincroniza el estado local del equipo con el backend C."""
+        result = self.backend.team_view()
+        if result['status'] == 'ok':
+            self.equipo = result['team']
+    
     def add_selected_to_team(self):
         selection = self.pokedex_listbox.curselection()
         if not selection:
             return
             
         if len(self.equipo) >= 6:
-            messagebox.showwarning("Equipo Completo", "Tu equipo ya tiene el límite máximo de 6 Pokémon. Elimina o deshace un integrante.")
+            messagebox.showwarning("Equipo Completo", "Tu equipo ya tiene el límite máximo de 6 Pokémon.")
             return
             
         p = self.filtered_pokemon[selection[0]]
         
-        # Agregar a la pila
-        self.equipo.append(p)
+        # Enviar comando al backend C
+        result = self.backend.team_add(p['nombre'])
+        if result['status'] != 'ok':
+            messagebox.showwarning("Error", result.get('message', 'Error al agregar'))
+            return
+        
+        # Sincronizar equipo desde C
+        self.refresh_team_from_backend()
         
         # Feedback visual temporal
         self.add_team_btn.config(text="¡Añadido Exitosamente!")
@@ -666,26 +728,30 @@ class PokeHashGUI:
         if not self.equipo:
             messagebox.showinfo("Pila Vacía", "No hay Pokémon en el equipo para deshacer.")
             return
-            
-        # Operación Pop (LIFO Stack)
-        removed = self.equipo.pop()
-        messagebox.showinfo("Acción Deshecha (LIFO)", f"Se eliminó a {removed['nombre']} del equipo (última adición revertida).")
         
-        # Actualizar vistas
-        self.update_team_tab_view()
-        self.update_add_button_text()
+        # Operación Pop (LIFO) en el backend C
+        result = self.backend.team_undo()
+        if result['status'] == 'ok':
+            removed_name = result.get('removed', '???')
+            messagebox.showinfo("Acción Deshecha (LIFO)", f"Se eliminó a {removed_name} del equipo (última adición revertida).")
+            self.refresh_team_from_backend()
+            self.update_team_tab_view()
+            self.update_add_button_text()
+        else:
+            messagebox.showwarning("Error", result.get('message', 'Error'))
         
     def remove_from_team_at(self, idx):
         if idx < len(self.equipo):
-            removed = self.equipo.pop(idx)
-            messagebox.showinfo("Eliminado", f"Se eliminó a {removed['nombre']} del equipo.")
-            
-            # Actualizar vistas
-            self.update_team_tab_view()
-            self.update_add_button_text()
+            result = self.backend.team_remove(idx)
+            if result['status'] == 'ok':
+                removed_name = result.get('removed', '???')
+                messagebox.showinfo("Eliminado", f"Se eliminó a {removed_name} del equipo.")
+                self.refresh_team_from_backend()
+                self.update_team_tab_view()
+                self.update_add_button_text()
 
     # ==============================================================================
-    # ACTUALIZACIÓN Y ANÁLISIS DE LA PESTAÑA EQUIPO
+    # ACTUALIZACIÓN Y ANÁLISIS — Datos del backend C
     # ==============================================================================
     def update_team_tab_view(self):
         # Actualizar cabecera de cantidad
@@ -722,10 +788,11 @@ class PokeHashGUI:
                 card_widgets['name_lbl'].config(text="Slot Vacío", fg=COLOR_TEXT_MUTED, font=('Helvetica', 11, 'italic'))
                 card_widgets['btn_remove'].config(state='disabled', fg=COLOR_CARD)
                 
-        # Calcular debilidades y actualizar grid estratégico
+        # Solicitar análisis de debilidades al backend C
         self.calculate_team_weaknesses()
 
     def calculate_team_weaknesses(self):
+        """Obtiene el análisis de debilidades del backend C y actualiza la vista."""
         if not self.equipo:
             # Resetear cuadrícula si el equipo está vacío
             for tname, widgets in self.type_weakness_widgets.items():
@@ -733,65 +800,55 @@ class PokeHashGUI:
                 widgets['box'].config(bg='#25252d')
             self.alert_lbl.config(text="Forma un equipo para ver alertas tácticas.", fg=COLOR_TEXT_MUTED, bg='#25252d')
             return
-            
-        # Calcular multiplicadores elementales para los 18 tipos
-        # Para cada tipo atacante, vemos cuántos miembros del equipo lo resisten (< 1.0) o son débiles a él (> 1.0)
-        team_weaknesses = {} # atacante -> { 'weak': count, 'resist': count, 'double_weak': count }
         
-        types_list = list(TYPE_COLORS.keys())
-        double_weaknesses_alerts = [] # Lista de tuplas (Pokemon, Tipo) con debilidad 4x
+        # === TODA LA LÓGICA DE CÁLCULO VIENE DEL BACKEND C ===
+        result = self.backend.team_analyze()
+        if result['status'] != 'ok':
+            return
         
-        for atk_type in types_list:
-            weak_count = 0
-            resist_count = 0
-            double_weak_count = 0
+        grid = result['grid']          # [{type, weak, resist, immune, x4}, ...]
+        x4_alerts = result['x4_alerts']  # [{pokemon, type}, ...]
             
-            for p in self.equipo:
-                # Multiplicador del tipo atacante al Pokémon defendiendo
-                mult = TYPE_EFFECTIVENESS.get(atk_type, {}).get(p['tipo1'], 1.0)
-                if p['tipo2']:
-                    mult *= TYPE_EFFECTIVENESS.get(atk_type, {}).get(p['tipo2'], 1.0)
-                    
-                if mult > 1.0:
-                    weak_count += 1
-                    if mult >= 4.0:
-                        double_weak_count += 1
-                        double_weaknesses_alerts.append((p['nombre'], atk_type))
-                elif mult < 1.0:
-                    resist_count += 1
-                    
-            team_weaknesses[atk_type] = {
-                'weak': weak_count,
-                'resist': resist_count,
-                'double_weak': double_weak_count
-            }
+        # Actualizar los labels del grid en base al cálculo del backend C
+        for entry in grid:
+            tname = entry['type']
+            if tname not in self.type_weakness_widgets:
+                continue
             
-        # Actualizar los labels del grid en base al cálculo
-        for tname, widgets in self.type_weakness_widgets.items():
-            stats = team_weaknesses[tname]
-            w_cnt = stats['weak']
-            r_cnt = stats['resist']
-            dw_cnt = stats['double_weak']
+            widgets = self.type_weakness_widgets[tname]
+            w_cnt = entry['weak']
+            r_cnt = entry['resist']
+            dw_cnt = entry['x4']
+            imm_cnt = entry.get('immune', 0)
             
             txt_repr = ""
             bg_color = '#25252d'
             text_color = COLOR_TEXT_MUTED
             
-            if w_cnt > 0 or r_cnt > 0:
+            if w_cnt > 0 or r_cnt > 0 or imm_cnt > 0:
                 parts = []
                 if w_cnt > 0:
                     parts.append(f"▲ {w_cnt}")
+                if r_cnt > 0:
+                    parts.append(f"▼ {r_cnt}")
+                if imm_cnt > 0:
+                    parts.append(f"⊘ {imm_cnt}")
+                        
+                txt_repr = "  ".join(parts)
+                
+                # Lógica de color visual basada en el balance de resistencias vs debilidades
+                if (r_cnt + imm_cnt) > w_cnt:
+                    bg_color = '#1b3024' # Tinte verde suave por resistencia
+                    text_color = COLOR_SUCCESS
+                elif w_cnt > (r_cnt + imm_cnt):
                     bg_color = '#382226' # Tinte rojo suave por debilidad
                     text_color = COLOR_ACCENT
                     if dw_cnt > 0:
                         bg_color = '#4c1c24' # Rojo más oscuro por debilidad extrema x4
-                if r_cnt > 0:
-                    parts.append(f"▼ {r_cnt}")
-                    if w_cnt == 0:
-                        bg_color = '#1b3024' # Tinte verde suave por resistencia
-                        text_color = COLOR_SUCCESS
-                        
-                txt_repr = "  ".join(parts)
+                else:
+                    # Empate
+                    bg_color = '#302b1c' # Tinte amarillento/neutral
+                    text_color = COLOR_SECONDARY
             else:
                 txt_repr = "Neutral"
                 bg_color = '#25252d'
@@ -800,16 +857,34 @@ class PokeHashGUI:
             widgets['count_lbl'].config(text=txt_repr, fg=text_color)
             widgets['box'].config(bg=bg_color)
             
-        # Actualizar alerta táctica
-        if double_weaknesses_alerts:
+        # Actualizar alerta táctica con datos del backend C
+        self.alert_text_widget.config(state='normal')
+        self.alert_text_widget.delete('1.0', tk.END)
+        
+        if x4_alerts:
             alert_text = "⚠️ ADVERTENCIA TÁCTICA:\n"
-            alerts_str = [f"{pmon} tiene debilidad crítica (x4) a {tipo.upper()}" for pmon, tipo in double_weaknesses_alerts]
-            alert_text += "\n".join(alerts_str[:3])
-            if len(alerts_str) > 3:
-                alert_text += f"\n... y {len(alerts_str)-3} más."
-            self.alert_lbl.config(text=alert_text, fg='#ff9f43', bg='#3b2d1c')
+            alerts_str = [f"{a['pokemon']} tiene debilidad crítica (x4) a {a['type'].upper()}" for a in x4_alerts]
+            alert_text += "\n".join(alerts_str)
+            
+            self.alert_text_widget.insert(tk.END, alert_text)
+            self.alert_text_widget.config(fg='#ff9f43', bg='#3b2d1c', state='disabled')
+            
+            # Mostrar scrollbar solo si hay 3 o más alertas
+            if len(alerts_str) >= 3:
+                self.alert_text_widget.pack_forget()
+                self.alert_scrollbar.pack(side='right', fill='y')
+                self.alert_text_widget.pack(side='left', fill='both', expand=True)
+            else:
+                self.alert_scrollbar.pack_forget()
+                self.alert_text_widget.pack_forget()
+                self.alert_text_widget.pack(fill='both', expand=True)
         else:
-            self.alert_lbl.config(text="✓ Balance de Tipos Estable:\nTu equipo actual no tiene debilidades críticas x4 de tipo.", fg=COLOR_SUCCESS, bg='#1b3024')
+            self.alert_text_widget.insert(tk.END, "✓ Balance de Tipos Estable:\nTu equipo actual no tiene debilidades críticas x4 de tipo.")
+            self.alert_text_widget.config(fg=COLOR_SUCCESS, bg='#1b3024', state='disabled')
+            
+            self.alert_scrollbar.pack_forget()
+            self.alert_text_widget.pack_forget()
+            self.alert_text_widget.pack(fill='both', expand=True)
 
     # ==============================================================================
     # EXPORTACIÓN DEL EQUIPO Y REPORTE
@@ -820,65 +895,12 @@ class PokeHashGUI:
             return
             
         filename = "equipo.txt"
-        try:
-            with open(filename, "w", encoding="utf-8") as f:
-                f.write("========================================\n")
-                f.write("        POKEHASH: REPORTE DE EQUIPO     \n")
-                f.write("========================================\n\n")
-                
-                f.write(f"Total Integrantes: {len(self.equipo)} / 6\n\n")
-                f.write("Integrantes del Equipo:\n")
-                
-                for idx, p in enumerate(self.equipo):
-                    t_str = p['tipo1']
-                    if p['tipo2']:
-                        t_str += f" / {p['tipo2']}"
-                    f.write(f"Slot {idx+1}: {p['nombre']} (ID: #{p['id']}) - Generación: {p['gen']}\n")
-                    f.write(f"  Tipos: {t_str}\n")
-                    f.write(f"  Estadísticas: HP: {p['hp']} | ATK: {p['ataque']} | DEF: {p['defensa']} | "
-                            f"SPA: {p['ataque_esp']} | SPD: {p['defensa_esp']} | SPE: {p['velocidad']}\n")
-                    f.write(f"  Total BST: {p['total']}\n")
-                    f.write("-" * 40 + "\n")
-                    
-                # Cálculo de debilidades elementales
-                f.write("\n========================================\n")
-                f.write("    ANÁLISIS TÁCTICO DE DEBILIDADES\n")
-                f.write("========================================\n")
-                
-                types_list = list(TYPE_COLORS.keys())
-                f.write("\n[Debilidades compuestas por tipo de daño]\n")
-                for atk_type in types_list:
-                    weak_count = 0
-                    double_weak_count = 0
-                    resist_count = 0
-                    
-                    for p in self.equipo:
-                        mult = TYPE_EFFECTIVENESS.get(atk_type, {}).get(p['tipo1'], 1.0)
-                        if p['tipo2']:
-                            mult *= TYPE_EFFECTIVENESS.get(atk_type, {}).get(p['tipo2'], 1.0)
-                        
-                        if mult > 1.0:
-                            weak_count += 1
-                            if mult >= 4.0:
-                                double_weak_count += 1
-                        elif mult < 1.0:
-                            resist_count += 1
-                            
-                    if weak_count > 0 or resist_count > 0:
-                        report_line = f" - Tipo {atk_type.upper():<10} : "
-                        if weak_count > 0:
-                            report_line += f"Debilidad x{weak_count} "
-                            if double_weak_count > 0:
-                                report_line += f"(incluye {double_weak_count} crít. x4) "
-                        if resist_count > 0:
-                            report_line += f"Resistencia x{resist_count}"
-                        f.write(report_line + "\n")
-                
-                f.write("\nGenerado por PokeHash GUI (Provisional) - C/Python Integrado.\n")
-                
+        result = self.backend.team_export(filename)
+        
+        if result['status'] == 'ok':
             messagebox.showinfo("Exportar", f"¡Equipo exportado con éxito a '{filename}'!\nContiene la ficha táctica y el análisis completo.")
-        except Exception as e:
-            messagebox.showerror("Error al Exportar", f"No se pudo guardar el archivo: {e}")
+        else:
+            messagebox.showerror("Error al Exportar", f"No se pudo guardar el archivo: {result.get('message', 'Error desconocido')}")
 
     # ==============================================================================
     # HELPERS DE DISEÑO Y EFECTOS

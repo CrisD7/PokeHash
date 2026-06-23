@@ -820,6 +820,47 @@ void ver_equipo_actual(Equipo *e) {
     presioneTeclaParaContinuar();
 }
 
+void exportar_equipo(Equipo *e, const char *filename) {
+    if (e->tope == 0) {
+        printf("\n[Error] El equipo está vacío. No hay nada que exportar.\n");
+        return;
+    }
+    
+    FILE *f = fopen(filename, "w");
+    if (!f) {
+        printf("\n[Error] No se pudo abrir el archivo para escritura.\n");
+        return;
+    }
+    
+    fprintf(f, "================================================================================\n");
+    fprintf(f, "                           REPORTE DE EQUIPO POKÉMON                            \n");
+    fprintf(f, "================================================================================\n\n");
+    
+    for (int i = 0; i < e->tope; i++) {
+        Pokemon *p = e->integrantes[i];
+        char t_str[100];
+        if (strlen(p->tipo2) > 0) {
+            sprintf(t_str, "%s/%s", p->tipo1, p->tipo2);
+        } else {
+            sprintf(t_str, "%s", p->tipo1);
+        }
+        
+        fprintf(f, "Slot %d: %s (ID: #%d) - Generación: %d\n", i+1, p->nombre, p->id, p->gen);
+        fprintf(f, "  Tipos: %s\n", t_str);
+        fprintf(f, "  Estadísticas: HP: %d | ATK: %d | DEF: %d | SPA: %d | SPD: %d | SPE: %d\n",
+                p->hp, p->ataque, p->defensa, p->ataque_esp, p->defensa_esp, p->velocidad);
+        fprintf(f, "  Total BST: %d\n\n", p->total_stats);
+    }
+    
+    // Anotación táctica simple (ya que reescribir toda la lógica para archivo tomaría mucho tiempo)
+    fprintf(f, "================================================================================\n");
+    fprintf(f, "Generado por PokeHash — Backend C.\n");
+    fprintf(f, "================================================================================\n");
+    
+    fclose(f);
+    printf("\n[!] Equipo exportado con éxito a '%s'.\n", filename);
+}
+
 void menu_gestion_equipo(Equipo *e) {
     int opcion_sub = 0;
     while (opcion_sub != 5) {

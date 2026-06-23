@@ -20,11 +20,17 @@ int main() {
             case 2:
                 menu_gestion_equipo(&miEquipo);
                 break;
-            case 3:
+            case 3: {
                 limpiarPantalla();
                 printf("\n[!] Has seleccionado Exportar Equipo.\n");
-                
+                printf("Ingrese el nombre del archivo (ejemplo: mi_equipo.txt): ");
+                char filename[256];
+                if (scanf("%255s", filename) == 1) {
+                    exportar_equipo(&miEquipo, filename);
+                }
+                presioneTeclaParaContinuar();
                 break;
+            }
             case 4:
                 limpiarPantalla();
                 printf("\nSaliendo de PokeHash... ¡Hasta luego!\n");
