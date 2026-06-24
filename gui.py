@@ -326,17 +326,20 @@ class PokeHashGUI:
         tipo_lbl.grid(row=0, column=0, sticky='w', pady=(0, 2))
         self.tipo_filter_var = tk.StringVar(value="Todos")
         tipos_disponibles = ["Todos"] + list(TYPE_COLORS.keys())
-        self.tipo_combo = ttk.Combobox(filters_frame, textvariable=self.tipo_filter_var, values=tipos_disponibles, state="readonly", width=12)
+        self.tipo_combo = tk.OptionMenu(filters_frame, self.tipo_filter_var, *tipos_disponibles, command=self.filter_pokemon)
+        self.tipo_combo.config(bg=COLOR_INPUT, fg=COLOR_TEXT_PRIMARY, activebackground=COLOR_CARD, activeforeground=COLOR_TEXT_PRIMARY, highlightthickness=0, bd=0, indicatoron=0)
+        self.tipo_combo["menu"].config(bg=COLOR_INPUT, fg=COLOR_TEXT_PRIMARY, activebackground=COLOR_ACCENT, activeforeground=COLOR_TEXT_PRIMARY)
         self.tipo_combo.grid(row=1, column=0, sticky='we', padx=(0, 5))
-        self.tipo_combo.bind("<<ComboboxSelected>>", self.filter_pokemon)
         
         # Filtro de Generación
         gen_lbl = tk.Label(filters_frame, text="Generación:", bg=COLOR_CARD, fg=COLOR_TEXT_MUTED, font=('Helvetica', 9, 'bold'))
         gen_lbl.grid(row=0, column=1, sticky='w', pady=(0, 2))
         self.gen_filter_var = tk.StringVar(value="Todas")
-        self.gen_combo = ttk.Combobox(filters_frame, textvariable=self.gen_filter_var, values=["Todas", "1", "2", "3", "4", "5", "6", "7", "8", "9"], state="readonly", width=10)
+        gens_disponibles = ["Todas", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        self.gen_combo = tk.OptionMenu(filters_frame, self.gen_filter_var, *gens_disponibles, command=self.filter_pokemon)
+        self.gen_combo.config(bg=COLOR_INPUT, fg=COLOR_TEXT_PRIMARY, activebackground=COLOR_CARD, activeforeground=COLOR_TEXT_PRIMARY, highlightthickness=0, bd=0, indicatoron=0)
+        self.gen_combo["menu"].config(bg=COLOR_INPUT, fg=COLOR_TEXT_PRIMARY, activebackground=COLOR_ACCENT, activeforeground=COLOR_TEXT_PRIMARY)
         self.gen_combo.grid(row=1, column=1, sticky='we')
-        self.gen_combo.bind("<<ComboboxSelected>>", self.filter_pokemon)
         
         filters_frame.columnconfigure(0, weight=1)
         filters_frame.columnconfigure(1, weight=1)
