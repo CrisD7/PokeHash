@@ -459,8 +459,11 @@ static void cmd_team_export(const char *json) {
         printf("{\"status\":\"error\",\"message\":\"Missing path\"}\n");
         return;
     }
-    exportar_equipo(&miEquipo, path);
-    printf("{\"status\":\"ok\"}\n");
+    if (exportar_equipo(&miEquipo, path)) {
+        printf("{\"status\":\"ok\"}\n");
+    } else {
+        printf("{\"status\":\"error\",\"message\":\"No se pudo exportar el equipo (¿está vacío?)\"}\n");
+    }
 }
 
 // ============================================================

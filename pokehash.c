@@ -820,16 +820,14 @@ void ver_equipo_actual(Equipo *e) {
     presioneTeclaParaContinuar();
 }
 
-void exportar_equipo(Equipo *e, const char *filename) {
+int exportar_equipo(Equipo *e, const char *filename) {
     if (e->tope == 0) {
-        printf("\n[Error] El equipo está vacío. No hay nada que exportar.\n");
-        return;
+        return 0;
     }
     
     FILE *f = fopen(filename, "w");
     if (!f) {
-        printf("\n[Error] No se pudo abrir el archivo para escritura.\n");
-        return;
+        return 0;
     }
     
     fprintf(f, "================================================================================\n");
@@ -858,7 +856,7 @@ void exportar_equipo(Equipo *e, const char *filename) {
     fprintf(f, "================================================================================\n");
     
     fclose(f);
-    printf("\n[!] Equipo exportado con éxito a '%s'.\n", filename);
+    return 1;
 }
 
 void menu_gestion_equipo(Equipo *e) {

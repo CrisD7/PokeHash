@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import subprocess
 import json
 import os
@@ -897,7 +897,15 @@ class PokeHashGUI:
             messagebox.showwarning("Exportar", "No puedes exportar un equipo vacío.")
             return
             
-        filename = "equipo.txt"
+        filename = filedialog.asksaveasfilename(
+            title="Guardar Equipo Pokémon",
+            defaultextension=".txt",
+            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
+            initialfile="equipo_pokehash.txt"
+        )
+        if not filename:
+            return # El usuario canceló
+            
         result = self.backend.team_export(filename)
         
         if result['status'] == 'ok':

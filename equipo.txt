@@ -1,0 +1,22 @@
+================================================================================
+                           REPORTE DE EQUIPO POKÉMON                            
+================================================================================
+
+Slot 1: Bulbasaur (ID: #1) - Generación: 1
+  Tipos: Grass/Poison
+  Estadísticas: HP: 45 | ATK: 49 | DEF: 49 | SPA: 65 | SPD: 65 | SPE: 45
+  Total BST: 318
+
+Slot 2: Charmander (ID: #4) - Generación: 1
+  Tipos: Fire/ 
+  Estadísticas: HP: 39 | ATK: 52 | DEF: 43 | SPA: 60 | SPD: 50 | SPE: 65
+  Total BST: 309
+
+Slot 3: Alolan Rattata (ID: #19) - Generación: 7
+  Tipos: Dark/Normal
+  Estadísticas: HP: 30 | ATK: 56 | DEF: 35 | SPA: 25 | SPD: 35 | SPE: 72
+  Total BST: 253
+
+================================================================================
+Generado por PokeHash — Backend C.
+================================================================================

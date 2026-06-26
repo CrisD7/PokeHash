@@ -50,7 +50,7 @@ const char* obtener_nombre_tipo (int indice);
 int obtener_indice_tipo(const char *tipo);
 void cargar_matriz_debilidades();
 void analizar_debilidades(Equipo *e);
-void exportar_equipo(Equipo *e, const char *filename);
+int exportar_equipo(Equipo *e, const char *filename);
 void menu_gestion_equipo(Equipo* e);
 void agregar_pokemon_equipo(Equipo* e);
 void ver_equipo_actual(Equipo* e);

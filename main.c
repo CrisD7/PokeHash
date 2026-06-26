@@ -26,7 +26,11 @@ int main() {
                 printf("Ingrese el nombre del archivo (ejemplo: mi_equipo.txt): ");
                 char filename[256];
                 if (scanf("%255s", filename) == 1) {
-                    exportar_equipo(&miEquipo, filename);
+                    if (exportar_equipo(&miEquipo, filename)) {
+                        printf("\n[!] Equipo exportado con éxito a '%s'.\n", filename);
+                    } else {
+                        printf("\n[Error] No se pudo exportar el equipo (¿está vacío o ruta inválida?).\n");
+                    }
                 }
                 presioneTeclaParaContinuar();
                 break;
