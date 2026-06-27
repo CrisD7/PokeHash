@@ -67,6 +67,7 @@ Para cumplir con las reglas del proyecto universitario, **toda la lógica, matem
   - Diseño e implementación de los TDAs Base (Tabla Hash y Listas Enlazadas).
   - Parser de datos (Carga desde `Pokemon.csv`).
   - Desarrollo del Gestor de Equipo (Lógica en C).
+  - Implementación de búsqueda por ID.
   - Menú clásico de consola.
   - Desarrollo de la API JSON (Backend C).
   - Creación de la Interfaz Gráfica en Python (con asistencia de IA).
@@ -77,14 +78,17 @@ Para cumplir con las reglas del proyecto universitario, **toda la lógica, matem
   - Implementación de TDA Grafo (Matriz de adyacencia).
   - Algoritmo matemático de debilidades y cruce de tipos elementales.
   - Redacción y estructura de la documentación del proyecto.
+  - Corrección de bugs.
 
 - **Simón Guzmán:** Gestor de Calidad.
   - Diseño e implementación de funciones de busqueda con filtro.
+  - Implementación de ranking de estadísticas.
   - Implementación de busqueda por tipo
   - Implementación de busqueda por generación.
   - Corrección de bugs.
 
 - **Bruno Orellana:** Responsable de Integración y Consistencia.
+  - Implementación de búsqueda por nombre.
   - Auditoría de consistencia de variables y testing general.
 
 ---
