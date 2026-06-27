@@ -6,13 +6,13 @@ Lo que comenzó como una aplicación de consola ha evolucionado a una arquitectu
 
 ---
 
-## 🚀 Cómo Empezar
+## Cómo Empezar
 
 ### Requisitos
 - Compilador GCC instalado en el sistema.
 - Python 3 instalado en el sistema (con la librería estándar `tkinter`).
 
-### ⚙️ Compilación
+### Compilación
 El proyecto cuenta con dos ejecutables: la versión clásica de consola y la versión de Interfaz de Programación de Aplicaciones (API) para la GUI.
 ```bash
 # Compilar versión clásica de Consola:
@@ -22,7 +22,7 @@ gcc -Wall -Wextra main.c pokehash.c tdas/extra.c tdas/list.c tdas/map.c -o pokeh
 gcc -Wall -Wextra pokehash_api.c pokehash.c tdas/extra.c tdas/list.c tdas/map.c -o pokehash_api
 ```
 
-### 🎮 Ejecución
+### Ejecución
 Para iniciar la experiencia gráfica interactiva:
 ```bash
 python3 gui.py
@@ -31,12 +31,12 @@ python3 gui.py
 
 ---
 
-## 🛠️ Estado de las Funcionalidades
+## Estado de las Funcionalidades
 
 ### 1. Explorar Pokédex (Completado)
 Interfaz interactiva para consultar el catálogo completo de Pokémon, con tiempos de respuesta instantáneos:
 - **Búsqueda Dinámica:** Búsqueda en tiempo real por Nombre o por ID (Número de Pokédex) respaldada por una Tabla Hash $O(1)$.
-- **Filtrado Avanzado:** Capacidad de filtrar el catálogo por Generación (1-9) y por Tipo Elemental, actualizando la lista de inmediato.
+- **Filtrado Avanzado:** Capacidad de filtrar el catálogo completo por Generación (1-9) y por Tipo Elemental. Dado que evalúa toda la Pokédex y luego ordena los resultados, esta operación tiene una complejidad temporal de $O(N \log N)$ (donde $N$ es la cantidad de Pokémon), lo cual sigue siendo imperceptiblemente rápido para el usuario.
 - **Ficha Técnica:** Visualización completa de los Stats Base de cada Pokémon (HP, ATK, DEF, SPA, SPD, SPE) y su suma total (BST).
 
 ### 2. Gestión Estratégica de Equipo (Completado)
@@ -50,7 +50,7 @@ Interfaz interactiva para consultar el catálogo completo de Pokémon, con tiemp
 
 ---
 
-## 🏗️ Arquitectura y Estructuras de Datos (TDAs)
+## Arquitectura y Estructuras de Datos (TDAs)
 
 Para cumplir con las reglas del proyecto universitario, **toda la lógica, matemáticas y procesamiento de datos recaen 100% sobre el lenguaje C. Python solo actúa como una "vista tonta"** comunicándose con C vía formato JSON (Arquitectura JSON-RPC). Todos los TDAs de C se han implementado desde cero sin librerías externas:
 
@@ -61,7 +61,7 @@ Para cumplir con las reglas del proyecto universitario, **toda la lógica, matem
 3. **TDA Grafo (Matriz de Adyacencia):**
    - Modelado de multiplicadores elementales de daño como una matriz bidimensional estática de `float` de 18x18 (para los 18 tipos elementales), garantizando consultas de debilidades en tiempo $O(1)$.
 
-## 👥 Integrantes y Tareas Realizadas
+## Integrantes y Tareas Realizadas
 
 - **Cristóbal Sazo:** Coordinador de Proyecto.
   - Diseño e implementación de los TDAs Base (Tabla Hash y Listas Enlazadas).
@@ -89,7 +89,7 @@ Para cumplir con las reglas del proyecto universitario, **toda la lógica, matem
 
 ---
 
-## ⚠️ Aspectos a Mejorar / Limitaciones
+## Aspectos a Mejorar / Limitaciones
 Como todo proyecto de software en desarrollo, existen áreas con oportunidades de mejora para futuras iteraciones:
 1. **Top 10 Estadístico ausente en la GUI:** Aunque el código en C posee la lógica matemática para calcular y ordenar el Top 10 de Pokémon según sus estadísticas, no se construyó un panel visual en la Interfaz Gráfica para interactuar con esta función.
 2. **Importación de Equipos:** El programa es capaz de exportar un equipo con éxito a un archivo de texto, pero actualmente no posee la función inversa (no se puede cargar un archivo `.txt` para restaurar un equipo guardado previamente).
