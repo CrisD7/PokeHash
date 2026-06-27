@@ -61,10 +61,37 @@ Para cumplir con las reglas del proyecto universitario, **toda la lógica, matem
 3. **TDA Grafo (Matriz de Adyacencia):**
    - Modelado de multiplicadores elementales de daño como una matriz bidimensional estática de `float` de 18x18 (para los 18 tipos elementales), garantizando consultas de debilidades en tiempo $O(1)$.
 
+## 👥 Integrantes y Tareas Realizadas
+
+- **Cristóbal Sazo:** Coordinador de Proyecto.
+  - Diseño e implementación de los TDAs Base (Tabla Hash y Listas Enlazadas).
+  - Parser de datos (Carga desde `Pokemon.csv`).
+  - Desarrollo del Gestor de Equipo (Lógica en C).
+  - Menú clásico de consola.
+  - Desarrollo de la API JSON (Backend C).
+  - Creación de la Interfaz Gráfica en Python (con asistencia de IA).
+  - Lógica de exportación de equipos a archivo local.
+
+- **Sebastián Riveros:** Comunicador.
+  - Diseño de los TDAs Base.
+  - Implementación de TDA Grafo (Matriz de adyacencia).
+  - Algoritmo matemático de debilidades y cruce de tipos elementales.
+  - Redacción y estructura de la documentación del proyecto.
+
+- **Simón Guzmán:** Gestor de Calidad.
+  - Diseño e implementación de funciones de busqueda con filtro.
+  - Implementación de busqueda por tipo
+  - Implementación de busqueda por generación.
+  - Corrección de bugs.
+
+- **Bruno Orellana:** Responsable de Integración y Consistencia.
+  - Auditoría de consistencia de variables y testing general.
+
 ---
 
-## 👥 Integrantes y Roles
-- **Cristóbal Sazo:** Coordinador de Proyecto (Planificación y ritmos de desarrollo).
-- **Sebastián Riveros:** Comunicador (Documentación y contacto con cátedra).
-- **Simón Guzmán:** Gestor de Calidad (Metodología ágil y Git).
-- **Bruno Orellana:** Responsable de Integración y Consistencia (Auditoría de consistencia de variables y testing).
+## ⚠️ Aspectos a Mejorar / Limitaciones
+Como todo proyecto de software en desarrollo, existen áreas con oportunidades de mejora para futuras iteraciones:
+1. **Top 10 Estadístico ausente en la GUI:** Aunque el código en C posee la lógica matemática para calcular y ordenar el Top 10 de Pokémon según sus estadísticas, no se construyó un panel visual en la Interfaz Gráfica para interactuar con esta función.
+2. **Importación de Equipos:** El programa es capaz de exportar un equipo con éxito a un archivo de texto, pero actualmente no posee la función inversa (no se puede cargar un archivo `.txt` para restaurar un equipo guardado previamente).
+3. **Ausencia de Habilidades (Abilities):** El cálculo táctico de inmunidades es puramente elemental basado en la matriz de Tipos. No toma en cuenta las Habilidades pasivas de los Pokémon que alteran las debilidades.
+4. **Ausencia de Sprites (Imágenes):** Para mantener la aplicación ultraligera y libre de dependencias de internet, la GUI se basa puramente en texto y colores, sin almacenar imágenes.
